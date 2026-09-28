@@ -26,6 +26,17 @@ export function serializeProject(row: Project): SerializedProject {
     order: row.order,
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),
+    supportEnabled: row.support_enabled ?? false,
+    supportTitleEn: row.support_title_en ?? null,
+    supportTitleFa: row.support_title_fa ?? null,
+    supportIntroEn: row.support_intro_en ?? null,
+    supportIntroFa: row.support_intro_fa ?? null,
+    supportBodyEn: row.support_body_en ?? null,
+    supportBodyFa: row.support_body_fa ?? null,
+    supportClosingEn: row.support_closing_en ?? null,
+    supportClosingFa: row.support_closing_fa ?? null,
+    supportEpisodesDone: row.support_episodes_done ?? null,
+    supportEpisodesTotal: row.support_episodes_total ?? null,
   };
 }
 

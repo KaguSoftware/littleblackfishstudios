@@ -16,7 +16,18 @@
       "order": 0,
       "created_at": "2026-05-15 08:24:50.149164+00",
       "updated_at": "2026-05-19 12:02:33.009717+00",
-      "category_id": "305f1b9b-3499-455d-a286-856c041c32dd"
+      "category_id": "305f1b9b-3499-455d-a286-856c041c32dd",
+      "support_enabled": true,
+      "support_title_en": "Support Modern Shahnameh",
+      "support_title_fa": "از شاهنامه مدرن حمایت کنید",
+      "support_intro_en": "Modern Shahnameh is an independent 100-episode series that retells the stories of Ferdowsi's Shahnameh from the very beginning, step by step, in a visual, cinematic, contemporary language.",
+      "support_intro_fa": "شاهنامه مدرن یک مجموعهٔ مستقل صدقسمتی است که داستان‌های شاهنامهٔ فردوسی را از آغاز، قدم‌به‌قدم و با زبانی تصویری، سینمایی و معاصر بازآفرینی می‌کند.",
+      "support_body_en": "## What is Modern Shahnameh?\n\nThis series is not simply an illustration of an ancient text or a historical reconstruction. We are trying to tell the world of the Shahnameh, its characters, choices, defeats and victories, with a fresh eye rooted in Iranian culture, so that today's generation and audiences around the world can connect with these stories again.\n\n## Why are we making it?\n\nThe Shahnameh is not just a collection of battles and kings. It is part of our memory, our imagination and our cultural identity. But preserving these stories is not enough to keep them alive. They have to be retold, seen, and brought into the language of our time.\n\nOur goal is to build a contemporary, independent visual archive of the Shahnameh: a 100-episode series that takes this heritage off the page and turns it into a living experience that today's generation can watch and share.\n\nSo far, 12 episodes have been made and released, and production of the next ones continues.\n\n## How does your support help?\n\nEvery episode involves research and rereading of the Shahnameh, story and character design, image and video production, music, sound design, editing and post-production.\n\nThe project will continue either way, but support from the audience helps the next episodes come out faster, more regularly and at a consistent quality, bringing us closer to a weekly release schedule.\n\nIf this journey matters to you, you can support it with any amount you like. The amount is entirely your choice, with no minimum and no obligation.",
+      "support_body_fa": "## شاهنامه مدرن چیست؟\n\nاین مجموعه صرفاً تصویرسازی یک متن کهن یا بازسازی تاریخی نیست. ما تلاش می‌کنیم جهان شاهنامه، شخصیت‌ها، انتخاب‌ها، شکست‌ها و پیروزی‌های آن را با نگاهی تازه و ریشه‌دار در فرهنگ ایران روایت کنیم؛ به شکلی که نسل امروز و مخاطبان سراسر جهان بتوانند دوباره با این داستان‌ها ارتباط برقرار کنند.\n\n## چرا این پروژه را می‌سازیم؟\n\nشاهنامه فقط مجموعه‌ای از نبردها و پادشاهان نیست؛ بخشی از حافظه، تخیل و هویت فرهنگی ماست. اما برای زنده‌ماندن این داستان‌ها، تنها حفظ آن‌ها کافی نیست؛ باید دوباره روایت شوند، دیده شوند و به زبان زمانهٔ ما درآیند.\n\nهدف ما ساختن یک آرشیو تصویری معاصر و مستقل از شاهنامه است؛ مجموعه‌ای صدقسمتی که این میراث را از دل کتاب بیرون بیاورد و به تجربه‌ای زنده، قابل‌دیدن و قابل‌اشتراک برای نسل امروز تبدیل کند.\n\nتا امروز ۱۲ قسمت از این مسیر ساخته و منتشر شده است و تولید قسمت‌های بعدی ادامه دارد.\n\n## حمایت شما چه کمکی می‌کند؟\n\nساخت هر قسمت شامل تحقیق و بازخوانی شاهنامه، طراحی روایت و شخصیت‌ها، تولید تصاویر و ویدئوها، موسیقی، طراحی صدا، تدوین و پس‌تولید است.\n\nاین پروژه در هر صورت ادامه پیدا می‌کند؛ اما حمایت مالی مخاطبان کمک می‌کند قسمت‌های بعدی سریع‌تر، منظم‌تر و با کیفیتی پایدار تولید شوند و بتوانیم به برنامهٔ انتشار هفتگی نزدیک‌تر شویم.\n\nاگر این مسیر برای شما ارزشمند است، می‌توانید با هر مبلغی که مایل هستید از ادامهٔ آن حمایت کنید. مبلغ حمایت کاملاً به انتخاب شماست و هیچ حداقل یا الزام مشخصی وجود ندارد.",
+      "support_closing_en": "One hundred episodes, one long road, so the stories of the Shahnameh are seen and heard again.",
+      "support_closing_fa": "صد قسمت، یک مسیر بلند؛ برای اینکه داستان‌های شاهنامه دوباره دیده و شنیده شوند.",
+      "support_episodes_done": 12,
+      "support_episodes_total": 100
     },
     {
       "id": "4696f607-9ec7-423a-877e-9fcfb8af9051",
@@ -33,7 +44,18 @@
       "order": 0,
       "created_at": "2026-05-05 16:21:24.432561+00",
       "updated_at": "2026-05-12 07:33:30.897568+00",
-      "category_id": "56f0d1b2-f8f1-4124-8678-536faa49d36e"
+      "category_id": "56f0d1b2-f8f1-4124-8678-536faa49d36e",
+      "support_enabled": false,
+      "support_title_en": null,
+      "support_title_fa": null,
+      "support_intro_en": null,
+      "support_intro_fa": null,
+      "support_body_en": null,
+      "support_body_fa": null,
+      "support_closing_en": null,
+      "support_closing_fa": null,
+      "support_episodes_done": null,
+      "support_episodes_total": null
     },
     {
       "id": "8cac20d9-1ec4-434e-a11a-e7565dc1f3c3",
@@ -50,7 +72,18 @@
       "order": 1,
       "created_at": "2026-05-05 16:16:47.38047+00",
       "updated_at": "2026-05-12 07:33:37.323078+00",
-      "category_id": "56f0d1b2-f8f1-4124-8678-536faa49d36e"
+      "category_id": "56f0d1b2-f8f1-4124-8678-536faa49d36e",
+      "support_enabled": false,
+      "support_title_en": null,
+      "support_title_fa": null,
+      "support_intro_en": null,
+      "support_intro_fa": null,
+      "support_body_en": null,
+      "support_body_fa": null,
+      "support_closing_en": null,
+      "support_closing_fa": null,
+      "support_episodes_done": null,
+      "support_episodes_total": null
     },
     {
       "id": "2b2520b1-2463-4319-85d6-1bdcdf464423",
@@ -67,7 +100,18 @@
       "order": 2,
       "created_at": "2026-05-05 16:14:35.55634+00",
       "updated_at": "2026-05-12 07:33:45.208895+00",
-      "category_id": "56f0d1b2-f8f1-4124-8678-536faa49d36e"
+      "category_id": "56f0d1b2-f8f1-4124-8678-536faa49d36e",
+      "support_enabled": false,
+      "support_title_en": null,
+      "support_title_fa": null,
+      "support_intro_en": null,
+      "support_intro_fa": null,
+      "support_body_en": null,
+      "support_body_fa": null,
+      "support_closing_en": null,
+      "support_closing_fa": null,
+      "support_episodes_done": null,
+      "support_episodes_total": null
     },
     {
       "id": "cba1628d-b5d1-4c88-a404-d1b8cd56ed59",
@@ -84,7 +128,18 @@
       "order": 3,
       "created_at": "2026-05-05 16:12:13.589154+00",
       "updated_at": "2026-05-12 07:33:53.450702+00",
-      "category_id": "56f0d1b2-f8f1-4124-8678-536faa49d36e"
+      "category_id": "56f0d1b2-f8f1-4124-8678-536faa49d36e",
+      "support_enabled": false,
+      "support_title_en": null,
+      "support_title_fa": null,
+      "support_intro_en": null,
+      "support_intro_fa": null,
+      "support_body_en": null,
+      "support_body_fa": null,
+      "support_closing_en": null,
+      "support_closing_fa": null,
+      "support_episodes_done": null,
+      "support_episodes_total": null
     },
     {
       "id": "15959350-8153-4547-9f4a-e851f36d8765",
@@ -101,7 +156,18 @@
       "order": 4,
       "created_at": "2026-05-05 16:17:55.177831+00",
       "updated_at": "2026-05-12 07:34:01.639455+00",
-      "category_id": "56f0d1b2-f8f1-4124-8678-536faa49d36e"
+      "category_id": "56f0d1b2-f8f1-4124-8678-536faa49d36e",
+      "support_enabled": false,
+      "support_title_en": null,
+      "support_title_fa": null,
+      "support_intro_en": null,
+      "support_intro_fa": null,
+      "support_body_en": null,
+      "support_body_fa": null,
+      "support_closing_en": null,
+      "support_closing_fa": null,
+      "support_episodes_done": null,
+      "support_episodes_total": null
     },
     {
       "id": "18ebb3df-d0fc-4202-95c7-75af1f214af7",
@@ -125,7 +191,18 @@
       "order": 5,
       "created_at": "2026-05-06 06:55:18.521213+00",
       "updated_at": "2026-05-12 07:34:08.826724+00",
-      "category_id": "482beccb-bc11-4895-9a40-56914287b848"
+      "category_id": "482beccb-bc11-4895-9a40-56914287b848",
+      "support_enabled": false,
+      "support_title_en": null,
+      "support_title_fa": null,
+      "support_intro_en": null,
+      "support_intro_fa": null,
+      "support_body_en": null,
+      "support_body_fa": null,
+      "support_closing_en": null,
+      "support_closing_fa": null,
+      "support_episodes_done": null,
+      "support_episodes_total": null
     },
     {
       "id": "abc0d7cc-91f8-4a35-86c5-57535ef444b2",
@@ -147,7 +224,18 @@
       "order": 6,
       "created_at": "2026-05-06 07:16:42.413229+00",
       "updated_at": "2026-05-12 07:34:15.753875+00",
-      "category_id": "cfb36d11-3381-4be2-9445-ff7d5ced2b83"
+      "category_id": "cfb36d11-3381-4be2-9445-ff7d5ced2b83",
+      "support_enabled": false,
+      "support_title_en": null,
+      "support_title_fa": null,
+      "support_intro_en": null,
+      "support_intro_fa": null,
+      "support_body_en": null,
+      "support_body_fa": null,
+      "support_closing_en": null,
+      "support_closing_fa": null,
+      "support_episodes_done": null,
+      "support_episodes_total": null
     },
     {
       "id": "83e42b27-b50f-45c9-93b9-93aa2c8903eb",
@@ -168,7 +256,18 @@
       "order": 7,
       "created_at": "2026-05-05 14:19:00.899643+00",
       "updated_at": "2026-05-12 07:34:35.136447+00",
-      "category_id": "482beccb-bc11-4895-9a40-56914287b848"
+      "category_id": "482beccb-bc11-4895-9a40-56914287b848",
+      "support_enabled": false,
+      "support_title_en": null,
+      "support_title_fa": null,
+      "support_intro_en": null,
+      "support_intro_fa": null,
+      "support_body_en": null,
+      "support_body_fa": null,
+      "support_closing_en": null,
+      "support_closing_fa": null,
+      "support_episodes_done": null,
+      "support_episodes_total": null
     },
     {
       "id": "387888a4-d049-4ba9-8f42-b203bfb5fad6",
@@ -191,7 +290,18 @@
       "order": 8,
       "created_at": "2026-05-06 07:09:15.551886+00",
       "updated_at": "2026-05-12 07:34:40.941639+00",
-      "category_id": "482beccb-bc11-4895-9a40-56914287b848"
+      "category_id": "482beccb-bc11-4895-9a40-56914287b848",
+      "support_enabled": false,
+      "support_title_en": null,
+      "support_title_fa": null,
+      "support_intro_en": null,
+      "support_intro_fa": null,
+      "support_body_en": null,
+      "support_body_fa": null,
+      "support_closing_en": null,
+      "support_closing_fa": null,
+      "support_episodes_done": null,
+      "support_episodes_total": null
     },
     {
       "id": "889012c8-1617-4649-8690-2c7d30132d50",
@@ -213,7 +323,18 @@
       "order": 9,
       "created_at": "2026-05-06 07:11:52.078574+00",
       "updated_at": "2026-05-12 07:34:46.514109+00",
-      "category_id": "482beccb-bc11-4895-9a40-56914287b848"
+      "category_id": "482beccb-bc11-4895-9a40-56914287b848",
+      "support_enabled": false,
+      "support_title_en": null,
+      "support_title_fa": null,
+      "support_intro_en": null,
+      "support_intro_fa": null,
+      "support_body_en": null,
+      "support_body_fa": null,
+      "support_closing_en": null,
+      "support_closing_fa": null,
+      "support_episodes_done": null,
+      "support_episodes_total": null
     },
     {
       "id": "3fa7458f-4789-44c0-b355-e7baf726804d",
@@ -238,7 +359,18 @@
       "order": 10,
       "created_at": "2026-05-06 06:59:06.144067+00",
       "updated_at": "2026-05-12 07:34:59.657119+00",
-      "category_id": "482beccb-bc11-4895-9a40-56914287b848"
+      "category_id": "482beccb-bc11-4895-9a40-56914287b848",
+      "support_enabled": false,
+      "support_title_en": null,
+      "support_title_fa": null,
+      "support_intro_en": null,
+      "support_intro_fa": null,
+      "support_body_en": null,
+      "support_body_fa": null,
+      "support_closing_en": null,
+      "support_closing_fa": null,
+      "support_episodes_done": null,
+      "support_episodes_total": null
     },
     {
       "id": "58f50327-62fc-4051-9fdc-e64b2df1fccc",
@@ -260,7 +392,18 @@
       "order": 11,
       "created_at": "2026-05-06 06:51:33.922629+00",
       "updated_at": "2026-05-12 07:35:11.273893+00",
-      "category_id": "482beccb-bc11-4895-9a40-56914287b848"
+      "category_id": "482beccb-bc11-4895-9a40-56914287b848",
+      "support_enabled": false,
+      "support_title_en": null,
+      "support_title_fa": null,
+      "support_intro_en": null,
+      "support_intro_fa": null,
+      "support_body_en": null,
+      "support_body_fa": null,
+      "support_closing_en": null,
+      "support_closing_fa": null,
+      "support_episodes_done": null,
+      "support_episodes_total": null
     },
     {
       "id": "167be7b6-42e9-4047-a505-b09687b06897",
@@ -279,7 +422,18 @@
       "order": 12,
       "created_at": "2026-05-06 06:56:40.922003+00",
       "updated_at": "2026-05-12 07:35:19.191093+00",
-      "category_id": "482beccb-bc11-4895-9a40-56914287b848"
+      "category_id": "482beccb-bc11-4895-9a40-56914287b848",
+      "support_enabled": false,
+      "support_title_en": null,
+      "support_title_fa": null,
+      "support_intro_en": null,
+      "support_intro_fa": null,
+      "support_body_en": null,
+      "support_body_fa": null,
+      "support_closing_en": null,
+      "support_closing_fa": null,
+      "support_episodes_done": null,
+      "support_episodes_total": null
     },
     {
       "id": "3fb47633-d734-4678-8e61-a422f6afc005",
@@ -302,7 +456,18 @@
       "order": 13,
       "created_at": "2026-05-06 06:53:17.904668+00",
       "updated_at": "2026-05-12 07:35:30.691347+00",
-      "category_id": "482beccb-bc11-4895-9a40-56914287b848"
+      "category_id": "482beccb-bc11-4895-9a40-56914287b848",
+      "support_enabled": false,
+      "support_title_en": null,
+      "support_title_fa": null,
+      "support_intro_en": null,
+      "support_intro_fa": null,
+      "support_body_en": null,
+      "support_body_fa": null,
+      "support_closing_en": null,
+      "support_closing_fa": null,
+      "support_episodes_done": null,
+      "support_episodes_total": null
     },
     {
       "id": "725316ba-7fb7-4283-b77e-c937ed9807e8",
@@ -331,7 +496,18 @@
       "order": 14,
       "created_at": "2026-05-06 07:26:26.052201+00",
       "updated_at": "2026-05-12 07:39:07.126623+00",
-      "category_id": "5235412b-59dd-4ad5-b5ed-b163c4d071b0"
+      "category_id": "5235412b-59dd-4ad5-b5ed-b163c4d071b0",
+      "support_enabled": false,
+      "support_title_en": null,
+      "support_title_fa": null,
+      "support_intro_en": null,
+      "support_intro_fa": null,
+      "support_body_en": null,
+      "support_body_fa": null,
+      "support_closing_en": null,
+      "support_closing_fa": null,
+      "support_episodes_done": null,
+      "support_episodes_total": null
     }
   ],
   "heroSlides": [

@@ -108,6 +108,20 @@ export async function getProjectNav(): Promise<ProjectNavRow[]> {
   );
 }
 
+/** Published projects that opted into the /support page switcher. */
+export async function getSupportProjects(): Promise<Project[]> {
+  return withFallback<Project>(
+    'support projects',
+    createAnonClient()
+      .from('projects')
+      .select('*')
+      .eq('published', true)
+      .eq('support_enabled', true)
+      .order('order', { ascending: true }),
+    () => snapshotProjects().filter((p) => p.support_enabled),
+  );
+}
+
 export async function getSitemapData() {
   const supabase = createAnonClient();
 

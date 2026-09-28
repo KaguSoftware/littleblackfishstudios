@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowUpLeft, ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import BackButton from '@/components/BackButton';
@@ -9,6 +9,7 @@ import { YouTubeEmbed } from '@/components/YouTubeEmbed';
 import { RichText } from '@/components/RichText';
 import GalleryCarousel from '@/components/GalleryCarousel';
 import { serializeProject } from '@/lib/serializers';
+import { SUPPORT_PAGE } from '@/data/support';
 
 interface Props {
   params: Promise<{ slug: string; locale: string }>;
@@ -133,6 +134,20 @@ export default async function ProjectPage({ params }: Props) {
           <div className="whitespace-pre-wrap text-lg md:text-xl leading-relaxed text-zinc-400 font-light">
             <RichText text={description} variant="card" />
           </div>
+
+          {project.supportEnabled && (
+            <Link
+              href={`/${locale}/support?project=${project.slug}`}
+              className="group inline-flex h-14 items-center gap-4 rounded-full bg-white/[0.03] ps-6 pe-2 ring-1 ring-white/15 transition-shadow ring-inset hover:ring-blue-500"
+            >
+              <span className="text-sm font-black tracking-[0.15em] text-white uppercase rtl:text-base rtl:font-normal rtl:tracking-normal">
+                {(isRtl ? SUPPORT_PAGE.fa : SUPPORT_PAGE.en).projectCta}
+              </span>
+              <span className="flex size-10 items-center justify-center rounded-full bg-blue-600 text-white transition-colors group-hover:bg-white group-hover:text-blue-600">
+                {isRtl ? <ArrowUpLeft className="size-4" /> : <ArrowUpRight className="size-4" />}
+              </span>
+            </Link>
+          )}
         </article>
 
         {/* Mobile & Bottom Navigation Footer */}

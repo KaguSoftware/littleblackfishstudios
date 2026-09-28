@@ -31,6 +31,7 @@ export default function ProjectForm({ locale, initialData, categories = [], onCl
   const [mediaType, setMediaType] = useState<'youtube' | 'gallery'>((initialData?.mediaType as 'youtube' | 'gallery') || 'youtube');
   const [galleryUrls, setGalleryUrls] = useState<string[]>(initialData?.galleryUrls || []);
   const [categoryId, setCategoryId] = useState<string>(initialData?.categoryId || '');
+  const [supportEnabled, setSupportEnabled] = useState(initialData?.supportEnabled ?? false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -63,6 +64,9 @@ export default function ProjectForm({ locale, initialData, categories = [], onCl
         mediaType,
         galleryUrls,
         categoryId: categoryId || null,
+        support: Object.fromEntries(
+          [...formData.entries()].filter(([k]) => k.startsWith('support')).map(([k, v]) => [k, String(v)]),
+        ),
       };
       const result = await createProject(data);
       if (result.success) {
@@ -297,7 +301,82 @@ export default function ProjectForm({ locale, initialData, categories = [], onCl
               )}
             </div>
           </div>
-          
+
+          {/* Support page: opt this project into the /support switcher */}
+          <div className="space-y-4 pt-4 border-t border-zinc-800">
+            <label className="flex items-center gap-2 cursor-pointer group">
+              <input
+                type="checkbox"
+                name="supportEnabled"
+                value="true"
+                checked={supportEnabled}
+                onChange={(e) => setSupportEnabled(e.target.checked)}
+                className="h-4 w-4 rounded border-zinc-800 bg-zinc-900 text-blue-600 focus:ring-blue-500"
+              />
+              <span className="text-sm text-zinc-400 group-hover:text-white transition-colors">
+                {isRtl ? 'نمایش در صفحهٔ حمایت' : 'Show on Support page'}
+              </span>
+            </label>
+
+            {/* Hidden rather than unmounted, so unticking keeps the text for later */}
+            <div className={supportEnabled ? 'space-y-4' : 'hidden'}>
+              <p className="text-xs text-zinc-500">
+                {isRtl
+                  ? 'متن اصلی: هر بخش را با یک خط «## عنوان» شروع کنید و پاراگراف‌ها را با یک خط خالی جدا کنید. متن را کوتاه نگه دارید تا صفحه در دسکتاپ جا شود.'
+                  : 'Main text: start each section with a "## Heading" line and separate paragraphs with a blank line. Keep it short so the page fits one desktop screen.'}
+              </p>
+              {([
+                ['Title', 'Support page title', 'عنوان صفحهٔ حمایت', 'input'],
+                ['Intro', 'Intro (one or two sentences)', 'معرفی کوتاه', 'short'],
+                ['Body', 'Main text', 'متن اصلی', 'long'],
+                ['Closing', 'Closing line', 'جملهٔ پایانی', 'short'],
+              ] as const).map(([field, labelEn, labelFa, kind]) =>
+                (['En', 'Fa'] as const).map((lang) => {
+                  const name = `support${field}${lang}` as const;
+                  const common = {
+                    name,
+                    defaultValue: initialData?.[name] ?? undefined,
+                    dir: lang === 'Fa' ? 'rtl' : 'ltr',
+                    className:
+                      'w-full rounded-lg bg-zinc-900 border border-zinc-800 p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all',
+                  };
+                  return (
+                    <div key={name}>
+                      <label className="block text-xs font-bold uppercase text-zinc-500 mb-1 ml-1">
+                        {isRtl ? `${labelFa} (${lang === 'En' ? 'انگلیسی' : 'فارسی'})` : `${lang === 'En' ? 'English' : 'Persian'} ${labelEn}`}
+                      </label>
+                      {kind === 'input' ? <input {...common} /> : <textarea {...common} rows={kind === 'long' ? 10 : 2} />}
+                    </div>
+                  );
+                }),
+              )}
+              <div className="grid grid-cols-2 gap-4">
+                {([
+                  ['supportEpisodesDone', 'Episodes released', 'قسمت‌های منتشرشده'],
+                  ['supportEpisodesTotal', 'Total episodes', 'کل قسمت‌ها'],
+                ] as const).map(([name, labelEn, labelFa]) => (
+                  <div key={name}>
+                    <label className="block text-xs font-bold uppercase text-zinc-500 mb-1 ml-1">
+                      {isRtl ? labelFa : labelEn}
+                    </label>
+                    <input
+                      type="number"
+                      min={0}
+                      name={name}
+                      defaultValue={initialData?.[name] ?? undefined}
+                      className="w-full rounded-lg bg-zinc-900 border border-zinc-800 p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                    />
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-zinc-500">
+                {isRtl
+                  ? 'برای پنهان کردن نوار پیشرفت، هر دو را خالی بگذارید.'
+                  : 'Leave both empty to hide the progress bar.'}
+              </p>
+            </div>
+          </div>
+
           <div className="flex items-center gap-4 pt-4 border-t border-zinc-800">
             {!initialData && (
               <label className="flex items-center gap-2 cursor-pointer group">

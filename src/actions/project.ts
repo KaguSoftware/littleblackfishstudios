@@ -35,6 +35,30 @@ function isSupabaseUrl(url: string): boolean {
   return url.includes('.supabase.co/storage/');
 }
 
+const SUPPORT_TEXT_FIELDS = ['Title', 'Intro', 'Body', 'Closing'] as const;
+
+/** Support page columns from the project form (fields named supportTitleEn, supportEpisodesDone, ...). */
+function readSupportFields(values: FormData | Record<string, string>) {
+  const get = (name: string) =>
+    values instanceof FormData ? ((values.get(name) as string | null) ?? '') : (values[name] ?? '');
+  const text = (name: string) => get(name).trim() || null;
+  const int = (name: string) => {
+    const n = parseInt(get(name), 10);
+    return Number.isFinite(n) && n >= 0 ? n : null;
+  };
+
+  const row: Record<string, string | number | boolean | null> = {
+    support_enabled: get('supportEnabled') === 'true',
+    support_episodes_done: int('supportEpisodesDone'),
+    support_episodes_total: int('supportEpisodesTotal'),
+  };
+  for (const f of SUPPORT_TEXT_FIELDS) {
+    row[`support_${f.toLowerCase()}_en`] = text(`support${f}En`);
+    row[`support_${f.toLowerCase()}_fa`] = text(`support${f}Fa`);
+  }
+  return row;
+}
+
 export async function createProject(data: {
   slug?: string;
   titleEn: string;
@@ -47,6 +71,7 @@ export async function createProject(data: {
   mediaType?: string;
   galleryUrls?: string[];
   categoryId?: string | null;
+  support?: Record<string, string>;
 }) {
   await requireAdminUser();
   try {
@@ -67,6 +92,7 @@ export async function createProject(data: {
       gallery_urls: data.galleryUrls ?? [],
       category_id: data.categoryId ?? null,
       order: 0,
+      ...(data.support ? readSupportFields(data.support) : {}),
     });
 
     if (error) throw error;
@@ -109,6 +135,7 @@ export async function updateProject(id: string, formData: FormData) {
       media_type: mediaType,
       gallery_urls: galleryUrls,
       category_id: categoryId,
+      ...readSupportFields(formData),
     }).eq('id', id);
 
     if (error) throw error;

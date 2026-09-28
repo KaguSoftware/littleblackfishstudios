@@ -92,7 +92,17 @@ async function fromCsv(dir) {
   const projects = (await read('projects'))
     .map((r) => {
       nullable(r, ['youtube_url', 'image_url', 'description_en', 'description_fa', 'category_id']);
-      return { ...r, published: toBool(r.published), order: Number(r.order), gallery_urls: toArray(r.gallery_urls) };
+      nullable(r, Object.keys(r).filter((k) => k.startsWith('support_') && k !== 'support_enabled'));
+      const toInt = (v) => (v == null ? null : Number(v));
+      return {
+        ...r,
+        published: toBool(r.published),
+        order: Number(r.order),
+        gallery_urls: toArray(r.gallery_urls),
+        support_enabled: toBool(r.support_enabled),
+        support_episodes_done: toInt(r.support_episodes_done),
+        support_episodes_total: toInt(r.support_episodes_total),
+      };
     })
     .filter((r) => r.published)
     .sort(byOrder);

@@ -14,6 +14,18 @@ export interface Project {
   order: number;
   created_at: string;
   updated_at: string;
+  // Support page content. Optional: absent until the project_support migration has run.
+  support_enabled?: boolean;
+  support_title_en?: string | null;
+  support_title_fa?: string | null;
+  support_intro_en?: string | null;
+  support_intro_fa?: string | null;
+  support_body_en?: string | null;
+  support_body_fa?: string | null;
+  support_closing_en?: string | null;
+  support_closing_fa?: string | null;
+  support_episodes_done?: number | null;
+  support_episodes_total?: number | null;
 }
 
 export interface HeroSlide {
@@ -59,6 +71,17 @@ export interface SerializedProject {
   order: number;
   createdAt: Date;
   updatedAt: Date;
+  supportEnabled: boolean;
+  supportTitleEn: string | null;
+  supportTitleFa: string | null;
+  supportIntroEn: string | null;
+  supportIntroFa: string | null;
+  supportBodyEn: string | null;
+  supportBodyFa: string | null;
+  supportClosingEn: string | null;
+  supportClosingFa: string | null;
+  supportEpisodesDone: number | null;
+  supportEpisodesTotal: number | null;
 }
 
 export interface SerializedHeroSlide {
