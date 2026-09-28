@@ -6,6 +6,8 @@ export interface HeroSlide {
   subtitleFa: string | null;
   imageUrl: string | null;
   youtubeUrl: string | null;
+  /** Still image shown behind a video slide until it plays (or if it can't load). */
+  posterUrl?: string | null;
 }
 
 export interface HeroProps {

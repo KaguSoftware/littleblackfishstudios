@@ -119,16 +119,31 @@ const HeroClient: React.FC<HeroProps> = ({ slides, locale }) => {
 							)
 						) : currentSlide.imageUrl &&
 						  isVideo(currentSlide.imageUrl) ? (
-							<video
-								key={currentSlide.imageUrl}
-								src={currentSlide.imageUrl}
-								className="absolute inset-0 h-full w-full object-contain md:object-cover"
-								autoPlay
-								muted
-								loop
-								playsInline
-								preload="metadata"
-							/>
+							<>
+								{currentSlide.posterUrl && (
+									<Image
+										src={currentSlide.posterUrl}
+										alt={title || "Hero background"}
+										fill
+										priority
+										className="object-contain md:object-cover"
+									/>
+								)}
+								<video
+									key={currentSlide.imageUrl}
+									src={currentSlide.imageUrl}
+									className="absolute inset-0 h-full w-full object-contain md:object-cover"
+									autoPlay
+									muted
+									loop
+									playsInline
+									preload="metadata"
+									// Storage down or file missing: hide the video so the poster shows through
+									onError={(e) => {
+										e.currentTarget.style.display = "none";
+									}}
+								/>
+							</>
 						) : currentSlide.imageUrl ? (
 							<Image
 								src={currentSlide.imageUrl}

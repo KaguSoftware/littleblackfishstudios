@@ -8,6 +8,7 @@ import {
 	serializeHeroSlide,
 	serializeCategory,
 } from "@/lib/serializers";
+import { getYouTubeMaxResThumbnail } from "@/lib/youtube";
 
 export const revalidate = 3600;
 
@@ -28,8 +29,20 @@ export default async function HomePage({ params }: HomePageProps) {
 		categories: categoryRows,
 	} = await getHomeData();
 
-	const slides = slideRows.map(serializeHeroSlide);
 	const projects = projectRows.map(serializeProject);
+
+	// Video slides get a still poster from the project named in the file (".../<id>-Gilgamesh.mp4"),
+	// so the hero isn't black while the video loads or if storage can't serve it.
+	const posterFor = (url: string | null) => {
+		const file = url?.split("/").pop()?.toLowerCase() ?? "";
+		if (!/\.(mp4|webm|ogg|mov)$/.test(file)) return null;
+		const project = projects.find((p) => file.includes(p.slug));
+		return project ? getYouTubeMaxResThumbnail(project.youtubeUrl) ?? project.imageUrl : null;
+	};
+	const slides = slideRows.map((row) => ({
+		...serializeHeroSlide(row),
+		posterUrl: posterFor(row.image_url),
+	}));
 	const categories = categoryRows.map(serializeCategory);
 
 	const projectsByCategory = new Map<string, typeof projects>();
