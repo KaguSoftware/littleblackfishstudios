@@ -10,5 +10,14 @@ export default function ConditionalFooter({ locale }: { locale: string }) {
 
   if (isAdminPage || isLoginPage) return null;
 
+  // The support page fits one screen on desktop, so the footer only shows on mobile.
+  if (pathname.includes(`/${locale}/support`)) {
+    return (
+      <div className="desk:hidden">
+        <Footer locale={locale} />
+      </div>
+    );
+  }
+
   return <Footer locale={locale} />;
 }
