@@ -5,6 +5,7 @@ import { createCategory, updateCategory } from '@/actions/category';
 import { useRouter } from 'next/navigation';
 import { Loader2, X } from 'lucide-react';
 import type { SerializedCategory } from '@/lib/types';
+import { useToast } from './Toast';
 
 interface CategoryFormProps {
   locale: string;
@@ -15,6 +16,7 @@ interface CategoryFormProps {
 export default function CategoryForm({ locale, initialData, onClose }: CategoryFormProps) {
   const isRtl = locale === 'fa';
   const router = useRouter();
+  const toast = useToast();
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -31,7 +33,7 @@ export default function CategoryForm({ locale, initialData, onClose }: CategoryF
         router.refresh();
         onClose?.();
       } else {
-        alert(result.error);
+        toast.error(result.error);
       }
     } else {
       const result = await createCategory({ nameEn, nameFa });
@@ -39,7 +41,7 @@ export default function CategoryForm({ locale, initialData, onClose }: CategoryF
         router.refresh();
         onClose?.();
       } else {
-        alert(result.error);
+        toast.error(result.error);
       }
     }
     setLoading(false);

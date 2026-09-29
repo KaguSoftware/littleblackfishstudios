@@ -1,6 +1,7 @@
 import { createServiceClient, requireAdminUser } from '@/lib/supabase/server';
 import { notFound, redirect } from 'next/navigation';
 import AdminDashboard from '@/components/Admin/AdminDashboard';
+import { ToastProvider } from '@/components/Admin/Toast';
 import {
   serializeProject,
   serializeHeroSlide,
@@ -51,13 +52,15 @@ export default async function AdminPage({ params }: AdminPageProps) {
 
   return (
     <div className="min-h-screen bg-linear-to-b from-black via-zinc-950 to-black text-white">
-      <AdminDashboard
-        initialProjects={projects}
-        initialHeroSlides={heroSlides}
-        initialCategories={categories}
-        initialSubmissions={submissions}
-        locale={locale}
-      />
+      <ToastProvider>
+        <AdminDashboard
+          initialProjects={projects}
+          initialHeroSlides={heroSlides}
+          initialCategories={categories}
+          initialSubmissions={submissions}
+          locale={locale}
+        />
+      </ToastProvider>
     </div>
   );
 }

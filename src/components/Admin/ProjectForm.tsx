@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import type { SerializedProject, SerializedCategory } from '@/lib/types';
+import { useToast } from './Toast';
 
 interface ProjectFormProps {
   locale: string;
@@ -26,6 +27,7 @@ interface ProjectFormProps {
 export default function ProjectForm({ locale, initialData, categories = [], onClose }: ProjectFormProps) {
   const isRtl = locale === 'fa';
   const router = useRouter();
+  const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState(initialData?.imageUrl || '');
   const [mediaType, setMediaType] = useState<'youtube' | 'gallery'>((initialData?.mediaType as 'youtube' | 'gallery') || 'youtube');
@@ -50,7 +52,7 @@ export default function ProjectForm({ locale, initialData, categories = [], onCl
         router.refresh();
         if (onClose) onClose();
       } else {
-        alert(result.error);
+        toast.error(result.error);
       }
     } else {
       const data = {
@@ -76,7 +78,7 @@ export default function ProjectForm({ locale, initialData, categories = [], onCl
         setGalleryUrls([]);
         if (onClose) onClose();
       } else {
-        alert(result.error);
+        toast.error(result.error);
       }
     }
     setLoading(false);

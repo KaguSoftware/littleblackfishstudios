@@ -6,6 +6,7 @@ import { createHeroSlide, updateHeroSlide } from '@/actions/hero';
 import { useRouter } from 'next/navigation';
 import { Loader2, X, Youtube } from 'lucide-react';
 import type { SerializedHeroSlide } from '@/lib/types';
+import { useToast } from './Toast';
 
 interface HeroFormProps {
   locale: string;
@@ -16,6 +17,7 @@ interface HeroFormProps {
 export default function HeroForm({ locale, initialData, onClose }: HeroFormProps) {
   const isRtl = locale === 'fa';
   const router = useRouter();
+  const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState(initialData?.imageUrl || '');
   const [youtubeUrl, setYoutubeUrl] = useState(initialData?.youtubeUrl || '');
@@ -35,7 +37,7 @@ export default function HeroForm({ locale, initialData, onClose }: HeroFormProps
         router.refresh();
         if (onClose) onClose();
       } else {
-        alert(result.error);
+        toast.error(result.error);
       }
     } else {
       const result = await createHeroSlide(formData);
@@ -43,7 +45,7 @@ export default function HeroForm({ locale, initialData, onClose }: HeroFormProps
         router.refresh();
         if (onClose) onClose();
       } else {
-        alert(result.error);
+        toast.error(result.error);
       }
     }
     setLoading(false);

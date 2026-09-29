@@ -25,6 +25,7 @@ import { toggleProjectStatus } from '@/actions/admin';
 import { deleteCategory, toggleCategoryVisibility } from '@/actions/category';
 import { setSubmissionRead, deleteSubmission } from '@/actions/contactSubmissions';
 import { signOut } from '@/actions/auth';
+import { useToast } from './Toast';
 import { RichText } from '@/components/RichText';
 import Image from 'next/image';
 import {
@@ -65,6 +66,7 @@ export default function AdminDashboard({
   locale,
 }: AdminDashboardProps) {
   const isRtl = locale === 'fa';
+  const toast = useToast();
   const [activeTab, setActiveTab] = useState<TabKey>('projects');
   const [editingItem, setEditingItem] = useState<
     SerializedProject | SerializedHeroSlide | SerializedCategory | null
@@ -107,7 +109,7 @@ export default function AdminDashboard({
     void deleteProject(item.id).then((result) => {
       if (!result.success) {
         setProjects(previous);
-        alert(isRtl ? 'خطا در حذف پروژه' : 'Failed to delete project');
+        toast.error(isRtl ? 'خطا در حذف پروژه' : 'Failed to delete project');
       }
     });
   };
@@ -117,7 +119,10 @@ export default function AdminDashboard({
     const previous = heroSlides;
     setHeroSlides((prev) => prev.filter((s) => s.id !== item.id));
     void deleteHeroSlide(item.id, item.image ?? '').then((result) => {
-      if (result && !result.success) setHeroSlides(previous);
+      if (result && !result.success) {
+        setHeroSlides(previous);
+        toast.error(isRtl ? 'خطا در حذف اسلاید' : 'Failed to delete slide');
+      }
     });
   };
 
