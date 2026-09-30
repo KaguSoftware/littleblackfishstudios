@@ -61,6 +61,10 @@ const nextConfig: NextConfig = {
         headers: [{ key: 'Cache-Control', value: HTML_EDGE }],
       },
       {
+        source: '/:locale(en|fa)/projects',
+        headers: [{ key: 'Cache-Control', value: HTML_EDGE }],
+      },
+      {
         source: '/:locale(en|fa)/projects/:slug',
         headers: [{ key: 'Cache-Control', value: HTML_EDGE }],
       },

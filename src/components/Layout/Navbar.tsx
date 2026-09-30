@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -13,10 +13,8 @@ export default function Navbar({ locale }: { locale: string }) {
 	const pathname = usePathname();
 	const isRtl = locale === "fa";
 
-	const isActive = (href: string) => {
-		if (href.includes('#projects')) return pathname === `/${locale}` || pathname === `/${locale}/`;
-		return pathname.startsWith(href.split('#')[0]) && href !== `/${locale}/`;
-	};
+	const isActive = (href: string) =>
+		pathname.startsWith(href.split('#')[0]) && href !== `/${locale}/`;
 
 	const { scrollY } = useScroll();
 	const headerHeight = useTransform(scrollY, [0, 120], [96, 72]);
@@ -67,24 +65,9 @@ export default function Navbar({ locale }: { locale: string }) {
 		window.location.href = segments.join("/");
 	};
 
-	const handleScroll = (
-		e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
-	) => {
-		if (pathname === `/${locale}` || pathname === `/${locale}/`) {
-			const href = e.currentTarget.getAttribute("href");
-			if (href?.includes("#projects")) {
-				e.preventDefault();
-				document
-					.getElementById("projects")
-					?.scrollIntoView({ behavior: "smooth" });
-				setIsOpen(false);
-			}
-		}
-	};
-
 	const navLinks = [
 		{
-			href: `/${locale}/#projects`,
+			href: `/${locale}/projects`,
 			label: isRtl ? "پروژه‌ها" : "Projects",
 		},
 		{ href: `/${locale}/about`, label: isRtl ? "درباره ما" : "About" },
@@ -142,11 +125,6 @@ export default function Navbar({ locale }: { locale: string }) {
 							<Link
 								key={link.href}
 								href={link.href}
-								onClick={
-									link.href.includes("#projects")
-										? handleScroll
-										: undefined
-								}
 								className={`relative group font-black uppercase text-xs tracking-[0.3em] transition-colors ${
 									isActive(link.href)
 										? 'text-white'
@@ -196,12 +174,7 @@ export default function Navbar({ locale }: { locale: string }) {
 						label: link.label,
 						href: link.href,
 						active: isActive(link.href),
-						onClick: link.href.includes("#projects")
-							? (e) => {
-									handleScroll(e);
-									setIsOpen(false);
-								}
-							: () => setIsOpen(false),
+						onClick: () => setIsOpen(false),
 					}))}
 					footer={
 						<button
