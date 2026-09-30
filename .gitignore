@@ -43,3 +43,6 @@ next-env.d.ts
 
 # supabase csv exports used to build src/data/fallback.json
 /exports
+
+# supabase CLI local state
+supabase/.temp/

@@ -40,12 +40,11 @@ async function withFallback<T>(label: string, query: QueryResult, fallbackRows: 
 export const getHomeData = cache(async () => {
   const supabase = createAnonClient();
 
-  const [slides, projects, categories] = await Promise.all([
-    withFallback<HeroSlide>(
-      'hero_slides',
-      supabase.from('hero_slides').select('*').eq('active', true).order('order', { ascending: true }),
-      snapshotSlides,
-    ),
+  // Hero slides are served from the snapshot (videos live in public/videos), not the DB,
+  // to save DB and storage usage.
+  const slides: HeroSlide[] = snapshotSlides();
+
+  const [projects, categories] = await Promise.all([
     withFallback<Project>(
       'projects',
       supabase.from('projects').select('*').eq('published', true).order('order', { ascending: true }),
