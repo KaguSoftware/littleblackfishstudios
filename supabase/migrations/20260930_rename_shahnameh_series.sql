@@ -1,12 +1,12 @@
--- Rename the Shahnameh series to "Shahnameh: Land of Crown and Legend" / "شاه نامه : سرزمینِ تاج و افسانه".
+-- Rename the Shahnameh series to "Shahnameh: Land of Crown and Legend" / "شاهنامه : سرزمینِ تاج و افسانه".
 -- Only touches the series name; mentions of Ferdowsi's Shahnameh (the book) are left as they are.
 update public.projects set
   title_en = $n$Shahnameh: Land of Crown and Legend$n$,
-  title_fa = $n$شاه نامه : سرزمینِ تاج و افسانه$n$,
+  title_fa = $n$شاهنامه : سرزمینِ تاج و افسانه$n$,
   support_title_en = $n$Support Shahnameh: Land of Crown and Legend$n$,
-  support_title_fa = $n$از شاه نامه : سرزمینِ تاج و افسانه حمایت کنید$n$,
+  support_title_fa = $n$از شاهنامه : سرزمینِ تاج و افسانه حمایت کنید$n$,
   support_intro_en = $n$Shahnameh: Land of Crown and Legend is an independent 100-episode series that retells the stories of Ferdowsi's Shahnameh from the very beginning, step by step, in a visual, cinematic, contemporary language.$n$,
-  support_intro_fa = $n$شاه نامه : سرزمینِ تاج و افسانه یک مجموعهٔ مستقل صدقسمتی است که داستان‌های شاهنامهٔ فردوسی را از آغاز، قدم‌به‌قدم و با زبانی تصویری، سینمایی و معاصر بازآفرینی می‌کند.$n$,
+  support_intro_fa = $n$شاهنامه : سرزمینِ تاج و افسانه یک مجموعهٔ مستقل صدقسمتی است که داستان‌های شاهنامهٔ فردوسی را از آغاز، قدم‌به‌قدم و با زبانی تصویری، سینمایی و معاصر بازآفرینی می‌کند.$n$,
   support_body_en = $n$## What is Shahnameh: Land of Crown and Legend?
 
 This series is not simply an illustration of an ancient text or a historical reconstruction. We are trying to tell the world of the Shahnameh, its characters, choices, defeats and victories, with a fresh eye rooted in Iranian culture, so that today's generation and audiences around the world can connect with these stories again.
@@ -26,7 +26,7 @@ Every episode involves research and rereading of the Shahnameh, story and charac
 The project will continue either way, but support from the audience helps the next episodes come out faster, more regularly and at a consistent quality, bringing us closer to a weekly release schedule.
 
 If this journey matters to you, you can support it with any amount you like. The amount is entirely your choice, with no minimum and no obligation.$n$,
-  support_body_fa = $n$## شاه نامه : سرزمینِ تاج و افسانه چیست؟
+  support_body_fa = $n$## شاهنامه : سرزمینِ تاج و افسانه چیست؟
 
 این مجموعه صرفاً تصویرسازی یک متن کهن یا بازسازی تاریخی نیست. ما تلاش می‌کنیم جهان شاهنامه، شخصیت‌ها، انتخاب‌ها، شکست‌ها و پیروزی‌های آن را با نگاهی تازه و ریشه‌دار در فرهنگ ایران روایت کنیم؛ به شکلی که نسل امروز و مخاطبان سراسر جهان بتوانند دوباره با این داستان‌ها ارتباط برقرار کنند.
 
