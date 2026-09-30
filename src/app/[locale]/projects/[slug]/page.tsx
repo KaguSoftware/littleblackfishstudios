@@ -93,7 +93,7 @@ export default async function ProjectPage({ params }: Props) {
           locale={locale}
           isRtl={isRtl}
           label={isRtl ? 'بازگشت به پروژه‌ها' : 'Back to Projects'}
-          fallbackHref={`/${locale}#projects`}
+          fallbackHref={`/${locale}/projects`}
         />
 
         {/* Media Section */}

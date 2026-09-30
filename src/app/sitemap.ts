@@ -9,6 +9,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const staticRoutes: MetadataRoute.Sitemap = LOCALES.flatMap((locale) => [
     { url: `${BASE_URL}/${locale}`, lastModified: new Date() },
+    { url: `${BASE_URL}/${locale}/projects`, lastModified: new Date() },
     { url: `${BASE_URL}/${locale}/about`, lastModified: new Date() },
     { url: `${BASE_URL}/${locale}/contact`, lastModified: new Date() },
     { url: `${BASE_URL}/${locale}/support`, lastModified: new Date() },
