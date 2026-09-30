@@ -14,14 +14,23 @@ const BLURB_MAX_LENGTH = 240;
 
 const OTHER_LABEL: Record<SphereLocale, string> = { en: 'Other', fa: 'سایر' };
 
-/** [dark, mid, bright], greys only. Rotated by project index so neighbouring screens differ. */
+/**
+ * [dark, mid, bright] colours for the animated screens, rotated by project index so neighbouring
+ * screens differ. Only the screens are coloured: the backdrop and the interface stay black and white.
+ */
 const PALETTES: SphereProject['palette'][] = [
-  ['#0a0a0a', '#6b6b6b', '#f2f2f2'],
-  ['#0d0d0d', '#8a8a8a', '#ffffff'],
-  ['#050505', '#555555', '#d9d9d9'],
-  ['#111111', '#9a9a9a', '#f7f7f7'],
-  ['#080808', '#767676', '#ebebeb'],
-  ['#0b0b0b', '#5e5e5e', '#cfcfcf'],
+  ['#0a0724', '#7a3dff', '#ff9df0'],
+  ['#02140f', '#14d9a0', '#d6ffe9'],
+  ['#140f02', '#ffb800', '#fff1b8'],
+  ['#04141a', '#00c2d1', '#c6fbff'],
+  ['#1b0612', '#ff3d7f', '#ffd1e3'],
+  ['#050a24', '#2b5cff', '#9fe3ff'],
+  ['#1a0606', '#ff5a1f', '#ffd08a'],
+  ['#0c1402', '#9be22a', '#f4ffc2'],
+  ['#02121a', '#22a7f0', '#d0f0ff'],
+  ['#14060a', '#e0245e', '#ffc2d4'],
+  ['#0e0620', '#b14dff', '#ffd6fb'],
+  ['#140a02', '#ff8a1f', '#ffe3b8'],
 ];
 
 /** The page-language text, or the other language when that one is blank. */

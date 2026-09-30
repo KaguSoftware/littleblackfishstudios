@@ -1,6 +1,6 @@
 // GLSL for the three things we draw: the inner shell, the dust/stars, and the screens.
-// Everything is black, white and the greys between, except the posters and clips themselves,
-// which keep their own colour. The screens are where the magic is:
+// Everything is black, white and the greys between, except the screens themselves (their
+// animations, posters and clips), which are in colour. The screens are where the magic is:
 // geometry is placed on the sphere in the vertex shader, and the placeholder "videos" are
 // procedural animations that loop perfectly (every time-dependent term is an integer
 // multiple of the loop phase).
@@ -32,7 +32,7 @@ varying vec2 vUv;
 
 uniform float uPhase;      // 0..1 position in the loop
 uniform float uScene;      // which placeholder animation
-uniform vec3 uC0;          // palette: dark, mid, bright (greys)
+uniform vec3 uC0;          // palette: dark, mid, bright
 uniform vec3 uC1;
 uniform vec3 uC2;
 uniform float uAspect;
@@ -243,13 +243,10 @@ void main() {
   float mask = 1.0 - smoothstep(-aa, aa, sd);
 
   // ── media ── (the procedural scene is skipped once a poster fully covers it)
-  // The placeholder animations are black & white; the posters and clips keep their own colour.
+  // The screens are the only colour: the animations use their project's palette, the posters and
+  // clips keep their own. (Everything around them is black and white.)
   vec3 col = vec3(0.0);
-  if (uVideo < 0.999) {
-    col = scene(uScene, p);
-    float lum0 = dot(col, vec3(0.299, 0.587, 0.114));
-    col = vec3(mix(lum0, lum0 * lum0 * (3.0 - 2.0 * lum0), 0.3));      // a touch more contrast
-  }
+  if (uVideo < 0.999) col = scene(uScene, p);
   if (uVideo > 0.001) {
     float va = uVideoAspect / uAspect;
     vec2 vuv = uv - 0.5;

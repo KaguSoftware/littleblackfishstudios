@@ -20,7 +20,7 @@ export interface SphereProject {
   video: string | null;
   /** Procedural fallback animation, 0-9, shown until the poster loads. */
   scene: number;
-  /** [dark, mid, bright], greys only. */
+  /** [dark, mid, bright] colours of the animated screen. */
   palette: [string, string, string];
 }
 
