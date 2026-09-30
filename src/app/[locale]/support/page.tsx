@@ -147,7 +147,7 @@ export default async function SupportPage({ params, searchParams }: Props) {
       {s.paragraphs.map((p, j) => (
         <p
           key={j}
-          className="text-[15px] leading-relaxed text-zinc-300 desk:text-[13px] desk:leading-[1.6] 2xl:text-sm rtl:font-sans rtl:leading-loose rtl:desk:leading-[1.8]"
+          className="text-[15px] leading-relaxed text-zinc-300 desk:text-[13px] desk:leading-[1.6] 2xl:text-sm rtl:font-sans rtl:leading-loose rtl:desk:leading-[1.8] short:text-xs short:leading-normal rtl:short:leading-relaxed"
         >
           {p}
         </p>
@@ -165,14 +165,14 @@ export default async function SupportPage({ params, searchParams }: Props) {
       </div>
 
       <div
-        className={`relative container mx-auto flex flex-col gap-14 px-5 pt-32 pb-16 sm:px-6 desk:h-full desk:pt-24 desk:pb-6 ${
+        className={`relative container mx-auto flex flex-col gap-14 px-5 pt-32 pb-16 sm:px-6 desk:h-full desk:pt-[5.5rem] desk:pb-5 ${
           sections.length
             ? 'desk:grid desk:grid-cols-12 desk:grid-rows-1 desk:items-center desk:gap-12 xl:gap-20'
             : 'desk:mx-auto desk:max-w-xl desk:justify-center'
         }`}
       >
         {/* Hero + payment */}
-        <div className="flex flex-col gap-8 desk:col-span-5 desk:max-h-full desk:gap-5 xl:gap-7">
+        <div className="flex flex-col gap-8 desk:col-span-5 desk:max-h-full desk:gap-5 desk:overflow-y-auto desk:[scrollbar-width:none] xl:gap-5 2xl:gap-7 short:gap-4">
           <div>
             <div className="mb-5 flex flex-col gap-4 desk:mb-4 desk:flex-row desk:flex-wrap desk:items-center desk:gap-x-5 desk:gap-y-3">
               <div className="flex shrink-0 items-center gap-3">
@@ -185,11 +185,11 @@ export default async function SupportPage({ params, searchParams }: Props) {
                 <ProjectPicker projects={projects} selected={selected} locale={locale} isRtl={isRtl} />
               )}
             </div>
-            <h1 className="text-[2.75rem] leading-[0.95] font-black tracking-tighter text-white uppercase sm:text-6xl desk:text-[2.75rem] xl:text-6xl rtl:leading-[1.25] rtl:font-normal rtl:tracking-normal">
+            <h1 className="text-[2.75rem] leading-[0.95] font-black tracking-tighter text-white uppercase sm:text-6xl desk:text-4xl xl:text-5xl 2xl:text-6xl short:text-3xl short:xl:text-3xl rtl:leading-[1.25] rtl:font-normal rtl:tracking-normal">
               {title}
             </h1>
             {intro && (
-              <p className="mt-5 text-base leading-relaxed text-zinc-400 desk:mt-4 desk:text-sm xl:text-base rtl:font-sans rtl:leading-loose">
+              <p className="mt-5 text-base leading-relaxed text-zinc-400 desk:mt-4 desk:text-sm xl:text-base rtl:font-sans rtl:leading-loose short:hidden">
                 {intro}
               </p>
             )}
@@ -230,10 +230,10 @@ export default async function SupportPage({ params, searchParams }: Props) {
 
         {/* Story. Scrolls inside its column on desktop if an admin writes more than fits. */}
         {sections.length > 0 && (
-          <div className="flex flex-col gap-10 desk:col-span-7 desk:max-h-full desk:gap-6 desk:overflow-y-auto desk:[scrollbar-width:thin] xl:gap-7">
+          <div className="flex flex-col gap-10 desk:col-span-7 desk:max-h-full desk:gap-6 desk:overflow-y-auto desk:[scrollbar-width:thin] xl:gap-7 short:gap-4">
             {section(first, 0)}
             {rest.length > 0 && (
-              <div className="grid gap-10 border-t border-white/10 pt-10 desk:grid-cols-2 desk:gap-8 desk:pt-6 xl:gap-10 xl:pt-7">
+              <div className="grid gap-10 border-t border-white/10 pt-10 desk:grid-cols-2 desk:gap-8 desk:pt-6 xl:gap-10 xl:pt-7 short:gap-5 short:pt-4">
                 {rest.map((s, i) => section(s, i + 1))}
               </div>
             )}

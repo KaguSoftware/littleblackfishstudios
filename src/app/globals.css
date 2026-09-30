@@ -1,7 +1,10 @@
 @import "tailwindcss";
 
 /* Desktop with enough height for single-screen layouts (short windows fall back to scrolling). */
-@custom-variant desk (@media (min-width: 64rem) and (min-height: 680px));
+@custom-variant desk (@media (min-width: 64rem) and (min-height: 600px));
+
+/* Desktop windows too short for the comfortable layout: pages using it switch to a compact one. */
+@custom-variant short (@media (min-width: 64rem) and (max-height: 699px));
 
 :root {
   --background: #000000;
