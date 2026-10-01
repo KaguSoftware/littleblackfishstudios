@@ -241,7 +241,7 @@
 .sp-loader {
   position: absolute; inset: 0; z-index: 10; display: grid; place-content: center; justify-items: center; gap: 18px;
   background: var(--bg); font-size: var(--fs-sm); letter-spacing: .28em; text-transform: uppercase; color: var(--dim);
-  transition: opacity .9s ease .1s, visibility 0s linear 1s;
+  transition: opacity .45s ease, visibility 0s linear .5s;
 }
 .sp-loader.is-done { opacity: 0; visibility: hidden; pointer-events: none; }
 .sp-loader__ring { width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid rgba(255, 255, 255, 0.14); border-top-color: var(--ink); animation: sp-spin 1s linear infinite; }

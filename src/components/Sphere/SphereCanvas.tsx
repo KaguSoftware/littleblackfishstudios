@@ -4,11 +4,12 @@ import { useEffect, useMemo, type MutableRefObject } from 'react';
 import * as THREE from 'three';
 import { Canvas, useFrame, type RootState } from '@react-three/fiber';
 import { CONFIG } from './config';
-import type { Slot } from './layout';
+import type { Slot, Vec3 } from './layout';
 import type { Navigator } from './navigator';
-import { MediaPool } from './media';
+import { nearestFirst, sharedMediaPool, type MediaPool } from './media';
 import type { Atlas } from './labelAtlas';
-import { SCREEN_VERT, SCREEN_FRAG, SHELL_VERT, SHELL_FRAG, STAR_VERT, STAR_FRAG } from './shaders';
+import { makeTile, type Tile } from './tile';
+import { SHELL_VERT, SHELL_FRAG, STAR_VERT, STAR_FRAG } from './shaders';
 
 const D2R = Math.PI / 180;
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
@@ -16,9 +17,57 @@ const damp = (cur: number, target: number, k: number, dt: number) => cur + (targ
 const dot = (a: ArrayLike<number>, b: ArrayLike<number>) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 const CORNERS = [[-1, -1], [1, -1], [1, 1], [-1, 1], [0, 0]];
 
-function hexToRgb(hex: string): [number, number, number] {
-  const n = parseInt(hex.replace('#', ''), 16);
-  return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
+/**
+ * Where a screen's own "up" edge points on the display, as an angle: 0 = straight up, ±90° = sideways
+ * (positive leans right), ±180° = upside down. It is the on-screen direction of the screen's up axis
+ * at its centre.
+ */
+function screenAngle(center: Vec3, up: Vec3, B: { f: Vec3; r: Vec3; u: Vec3 }) {
+  const z = dot(center, B.f);
+  if (z < 0.05) return 0;
+  const cx = dot(center, B.r);
+  const cy = dot(center, B.u);
+  const dx = dot(up, B.r) / z - (cx * dot(up, B.f)) / (z * z);
+  const dy = dot(up, B.u) / z - (cy * dot(up, B.f)) / (z * z);
+  return Math.atan2(dx, dy);
+}
+
+// Alignment: the sphere turns freely, so a screen can come round to lean over or hang upside down.
+// Each screen turns in its own plane to cancel that. A small lean is left alone (it is the sphere's
+// own curve, and what the front view looks like), anything more is unwound smoothly, and an upside
+// down screen ends up the right way up. No screen ever leans more than about 28°, and because the
+// unwinding follows the camera smoothly, a screen never whips round.
+const LEAN = 40 * D2R; // see keptLean: with this, nothing leans more than about 28°
+
+/** How much lean a screen leaning `angle` (on the display) is left with. Small leans pass through. */
+function keptLean(angle: number) {
+  return LEAN * Math.tanh(angle / LEAN) * ((1 + Math.cos(angle)) / 2);
+}
+
+/**
+ * How far to turn a screen in its own plane so that, on the display, it leans by `keptLean` instead
+ * of its own lean. Off the middle of the view perspective changes angles, so a turn of x in the
+ * screen's plane is not a turn of x on the display: this solves for the exact turn.
+ */
+function alignTurn(center: Vec3, right: Vec3, up: Vec3, B: { f: Vec3; r: Vec3; u: Vec3 }) {
+  const z = dot(center, B.f);
+  if (z < 0.05) return 0;
+  const cx = dot(center, B.r);
+  const cy = dot(center, B.u);
+  // where a small step along the screen's up / right axes goes on the display
+  const ax = dot(up, B.r) / z - (cx * dot(up, B.f)) / (z * z);
+  const ay = dot(up, B.u) / z - (cy * dot(up, B.f)) / (z * z);
+  const bx = dot(right, B.r) / z - (cx * dot(right, B.f)) / (z * z);
+  const by = dot(right, B.u) / z - (cy * dot(right, B.f)) / (z * z);
+  const want = keptLean(Math.atan2(ax, ay));
+  const tx = Math.sin(want);
+  const ty = Math.cos(want);
+  // turned by φ, the up axis shows as cos φ·a − sin φ·b; make that point along (tx, ty)
+  let phi = Math.atan2(ax * ty - ay * tx, bx * ty - by * tx);
+  const dx = Math.cos(phi) * ax - Math.sin(phi) * bx;
+  const dy = Math.cos(phi) * ay - Math.sin(phi) * by;
+  if (dx * tx + dy * ty < 0) phi += Math.PI;
+  return phi;
 }
 
 /** Mutable state the render loop reads every frame (no React re-render per frame). */
@@ -42,69 +91,6 @@ export interface SphereApi {
   screenOf(i: number): { x: number; y: number; visible: boolean };
 }
 
-interface Tile {
-  slot: Slot;
-  mesh: THREE.Mesh;
-  material: THREE.ShaderMaterial;
-  u: Record<string, THREE.IUniform>;
-  loop: number;
-  hover: number;
-  focus: number;
-  dim: number;
-  introDelay: number;
-  /** Scale the screen is drawn at this frame (1 = its full size). Hit-testing uses the same number. */
-  drawn: number;
-}
-
-function makeTile(slot: Slot, atlas: Atlas, dummy: THREE.Texture, geo: THREE.BufferGeometry, rtl: boolean): Tile {
-  const p = slot.project;
-  const [c0, c1, c2] = p.palette.map(hexToRgb);
-  const loops = CONFIG.loopSeconds;
-  const loop = loops[slot.projectIndex % loops.length];
-  const cell = atlas.cell(slot.projectIndex);
-  const u: Record<string, THREE.IUniform> = {
-    uCenter: { value: new THREE.Vector3(...slot.center) },
-    uRight: { value: new THREE.Vector3(...slot.right) },
-    uUp: { value: new THREE.Vector3(...slot.up) },
-    uHalf: { value: new THREE.Vector2(...slot.half) },
-    uRadius: { value: CONFIG.tileRadius },
-    uScale: { value: 1 },
-    uPhase: { value: 0 },
-    uScene: { value: p.scene },
-    uC0: { value: new THREE.Vector3(...c0) },
-    uC1: { value: new THREE.Vector3(...c1) },
-    uC2: { value: new THREE.Vector3(...c2) },
-    uAspect: { value: CONFIG.aspect },
-    uHover: { value: 0 },
-    uFocus: { value: 0 },
-    uDim: { value: 0 },
-    uIntro: { value: 0 },
-    uEdge: { value: 1 },
-    uColor: { value: 0 },
-    uRtl: { value: rtl ? 1 : 0 },
-    uTime: { value: 0 },
-    uAtlas: { value: atlas.texture },
-    uLabel: { value: new THREE.Vector4(cell.col, cell.row, atlas.cols, atlas.rows) },
-    uLabelAspect: { value: atlas.aspect },
-    uMap: { value: dummy },
-    uVideo: { value: 0 },
-    uVideoAspect: { value: 16 / 9 },
-  };
-  const material = new THREE.ShaderMaterial({
-    vertexShader: SCREEN_VERT,
-    fragmentShader: SCREEN_FRAG,
-    uniforms: u,
-    transparent: true,
-    side: THREE.DoubleSide,
-  });
-  const mesh = new THREE.Mesh(geo, material);
-  mesh.frustumCulled = false;
-  mesh.renderOrder = 1;
-  mesh.visible = false;
-  const ang = Math.acos(clamp(-slot.center[2], -1, 1)); // distance from the opening view
-  return { slot, mesh, material, u, loop, hover: 0, focus: 0, dim: 0, introDelay: 0.2 + ang * 0.55 + slot.seed * 0.18, drawn: 0 };
-}
-
 interface FrameContext {
   nav: Navigator;
   stateRef: MutableRefObject<SphereState>;
@@ -121,6 +107,8 @@ class Assets {
   shell: THREE.Mesh;
   stars: THREE.Points;
   aspect = 16 / 9;
+  /** Poster size asked for: the full one. (The globe on the home page only asks for a small one.) */
+  private posterWidth = window.matchMedia('(max-width: 760px)').matches ? 828 : 1080;
   // scratch for turning the camera
   private axes = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()];
   private turn = new THREE.Matrix4();
@@ -133,13 +121,19 @@ class Assets {
   private n = 0;
   private t0: number | null = null;
   private want = new Set<unknown>();
+  private facing: Float32Array;
+  private order: number[] = [];
 
-  constructor(slots: Slot[], atlas: Atlas, rtl: boolean) {
+  constructor(slots: Slot[], atlas: Atlas, rtl: boolean, introFrom?: Vec3) {
     this.geo = new THREE.PlaneGeometry(1, 1, 28, 16);
     this.dummy = new THREE.DataTexture(new Uint8Array([0, 0, 0, 255]), 1, 1);
     this.dummy.needsUpdate = true;
-    this.media = new MediaPool(window.matchMedia('(max-width: 760px)').matches ? 828 : 1080);
-    this.tiles = slots.map((s) => makeTile(s, atlas, this.dummy, this.geo, rtl));
+    // One pool for the whole session: the home page's globe already loaded these posters.
+    this.media = sharedMediaPool();
+    this.tiles = slots.map((s) => makeTile(s, atlas, this.dummy, this.geo, rtl, introFrom));
+    this.facing = new Float32Array(slots.length);
+    // Arriving through the globe, the sphere is already round you: the screens fly in faster.
+    if (introFrom) this.tiles.forEach((t) => (t.introDelay *= 0.45));
 
     this.shell = new THREE.Mesh(
       new THREE.SphereGeometry(CONFIG.shellRadius, 64, 48),
@@ -206,8 +200,8 @@ class Assets {
       const c = dot(d, s.center);
       if (c < 0.6) continue;
       const k = 1 / c;
-      const x = dot(d, s.right) * k;
-      const y = dot(d, s.up) * k;
+      const x = dot(d, t.right) * k;
+      const y = dot(d, t.up) * k;
       if (Math.abs(x) <= s.half[0] * t.drawn && Math.abs(y) <= s.half[1] * t.drawn) return s.index;
     }
     return -1;
@@ -257,6 +251,11 @@ class Assets {
     starU.uTime.value = time;
     starU.uPx.value = state.gl.getPixelRatio();
 
+    // Posters: the screens nearest the middle of the view get theirs first (a few fetches run at once).
+    for (let i = 0; i < this.tiles.length; i++) this.facing[i] = dot(B.f, this.tiles[i].slot.center);
+    nearestFirst(this.facing, cosView, this.order);
+    for (const i of this.order) this.media.get(this.tiles[i].slot.project, this.posterWidth);
+
     // Hover is re-picked here, every frame, from the last mouse position: however the view moves
     // (drift, inertia, zoom, flying to a screen) the highlighted screen is always the one under the cursor,
     // and it is exactly the one a click will open.
@@ -284,9 +283,26 @@ class Assets {
       let e = instant ? 1 : clamp((time - t.introDelay) / 1.0, 0, 1);
       e = 1 - Math.pow(1 - e, 3);
 
+      // Align. Whichever way the view is turned, a screen turns in its own plane so it reads (nearly)
+      // level. It is a plain function of how the screen sits on the display right now, so it never
+      // lags behind the camera, even mid-flight. Turned part way, a screen shrinks a little so it
+      // stays clear of its neighbours.
+      t.turn = alignTurn(slot.center, slot.right, slot.up, B);
+      const ct = Math.cos(t.turn);
+      const st2 = Math.sin(t.turn);
+      for (let k = 0; k < 3; k++) {
+        t.right[k] = slot.right[k] * ct + slot.up[k] * st2;
+        t.up[k] = slot.up[k] * ct - slot.right[k] * st2;
+      }
+      const ws = CONFIG.tileWidthDeg * slot.scale;
+      const hs = ws / CONFIG.aspect;
+      const sa = Math.abs(st2);
+      const ca = Math.abs(ct);
+      const room = Math.min(1, (CONFIG.rowStepDeg - 0.5) / (sa * ws + ca * hs), (ws + CONFIG.gapDeg * 0.8) / (ca * ws + sa * hs));
+
       u.uCenter.value.set(slot.center[0], slot.center[1], slot.center[2]);
-      u.uRight.value.set(slot.right[0], slot.right[1], slot.right[2]);
-      u.uUp.value.set(slot.up[0], slot.up[1], slot.up[2]);
+      u.uRight.value.set(t.right[0], t.right[1], t.right[2]);
+      u.uUp.value.set(t.up[0], t.up[1], t.up[2]);
       u.uPhase.value = ((time + slot.seed * t.loop) % t.loop) / t.loop;
       u.uTime.value = time;
       u.uHover.value = t.hover;
@@ -294,12 +310,12 @@ class Assets {
       u.uDim.value = t.dim;
       u.uIntro.value = e;
       u.uColor.value = CONFIG.posterColor === 'always' ? 1 : CONFIG.posterColor === 'focus' ? t.focus : 0;
-      t.drawn = slot.scale * (1 + 0.055 * t.hover + 0.02 * t.focus) * (0.88 + 0.12 * e);
+      t.drawn = slot.scale * (1 + 0.055 * t.hover + 0.02 * t.focus) * (0.88 + 0.12 * e) * room;
       u.uScale.value = t.drawn;
       u.uRadius.value = CONFIG.tileRadius * (1 - 0.02 * t.hover - 0.012 * t.focus) * (1 + (1 - e) * 0.05);
 
       // poster or clip, if this project has one
-      const item = this.media.get(slot.project);
+      const item = this.media.get(slot.project, this.posterWidth);
       if (item) {
         this.want.add(item);
         const ready = this.media.isReady(item);
@@ -361,10 +377,31 @@ class Assets {
     }
   }
 
+  /** For tests and debugging: of the screens on the display, how far the most tilted one leans from upright. */
+  alignStats(nav: Navigator) {
+    const B = nav.basis();
+    const tanV = Math.tan((nav.fov * D2R) / 2);
+    const tanH = tanV * this.aspect;
+    let shown = 0;
+    let turned = 0;
+    let worst = 0;
+    for (const t of this.tiles) {
+      if (t.drawn <= 0.02) continue;
+      const z = dot(t.slot.center, B.f);
+      if (z <= 0.05) continue;
+      if (Math.abs(dot(t.slot.center, B.r) / z / tanH) > 1 || Math.abs(dot(t.slot.center, B.u) / z / tanV) > 1) continue;
+      shown++;
+      if (Math.abs(t.turn) > Math.PI / 2) turned++;
+      worst = Math.max(worst, Math.abs(screenAngle(t.slot.center, t.up, B)));
+    }
+    return { shown, turned, worstDeg: Math.round(worst / D2R) };
+  }
+
   dispose() {
     this.geo.dispose();
     this.dummy.dispose();
-    this.media.dispose();
+    // The pool outlives this canvas (the posters stay decoded for the next one); just stop the clips.
+    this.media.pauseAll();
     this.tiles.forEach((t) => t.material.dispose());
     this.shell.geometry.dispose();
     (this.shell.material as THREE.Material).dispose();
@@ -378,13 +415,15 @@ interface WorldProps {
   slots: Slot[];
   atlas: Atlas;
   rtl: boolean;
+  /** Direction the screens fly in from. Default: the opening view. */
+  introFrom?: Vec3;
   stateRef: MutableRefObject<SphereState>;
   apiRef: MutableRefObject<SphereApi | null>;
   onReady?: () => void;
 }
 
-function World({ nav, slots, atlas, rtl, stateRef, apiRef, onReady }: WorldProps) {
-  const assets = useMemo(() => new Assets(slots, atlas, rtl), [slots, atlas, rtl]);
+function World({ nav, slots, atlas, rtl, introFrom, stateRef, apiRef, onReady }: WorldProps) {
+  const assets = useMemo(() => new Assets(slots, atlas, rtl, introFrom), [slots, atlas, rtl, introFrom]);
   useEffect(() => () => assets.dispose(), [assets]);
 
   // imperative API for the DOM layer (hit-testing, stats)
@@ -406,6 +445,17 @@ function World({ nav, slots, atlas, rtl, stateRef, apiRef, onReady }: WorldProps
       if (apiRef.current === api) apiRef.current = null;
     };
   }, [assets, nav, slots, stateRef, apiRef]);
+
+  // with ?debug in the URL: how far the most tilted screen on the display leans from upright
+  useEffect(() => {
+    if (!/[?&]debug\b/.test(window.location.search)) return undefined;
+    const w = window as unknown as { __SPHERE_ALIGN__?: () => unknown };
+    const fn = () => assets.alignStats(nav);
+    w.__SPHERE_ALIGN__ = fn;
+    return () => {
+      if (w.__SPHERE_ALIGN__ === fn) delete w.__SPHERE_ALIGN__;
+    };
+  }, [assets, nav]);
 
   useFrame((state, delta) => assets.frame(state, delta, { nav, stateRef, apiRef, onReady }));
 

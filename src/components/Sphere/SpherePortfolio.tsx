@@ -4,9 +4,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import './sphere.css';
 import SphereCanvas, { type SphereApi, type SphereState } from './SphereCanvas';
-import { Navigator, type SavedView } from './navigator';
-import { buildSlots, neighbour, lonLat, type Slot } from './layout';
-import { buildLabelAtlas, type Atlas } from './labelAtlas';
+import { Navigator, viewBasis, type SavedView } from './navigator';
+import { neighbour, lonLat, type Slot } from './layout';
+import { getAtlas, getLayout, peekAtlas } from './cache';
+import { clearEntry, peekEntry } from './entry';
+import type { Atlas } from './labelAtlas';
 import { SPHERE_COPY } from './copy';
 import { CONFIG } from './config';
 import Minimap from './Minimap';
@@ -29,7 +31,7 @@ type Saved = SavedView & { filter: string };
 function readSaved(): Saved | null {
   try {
     const v = JSON.parse(sessionStorage.getItem(STORE) ?? 'null');
-    if (v && [v.yaw, v.pitch, v.zoom].every((n) => typeof n === 'number' && Number.isFinite(n))) return v;
+    if (v && [v.yaw, v.pitch].every((n) => typeof n === 'number' && Number.isFinite(n))) return v;
   } catch {
     /* no storage, or junk in it */
   }
@@ -44,13 +46,20 @@ export default function SpherePortfolio({ projects: all, categories, locale }: S
   const rtl = locale === 'fa';
   const router = useRouter();
   const projects = useMemo(() => all.slice(0, CONFIG.maxProjects), [all]);
-  const layout = useMemo(() => buildSlots(projects), [projects]);
+  const layout = useMemo(() => getLayout(projects, rtl), [projects, rtl]);
   const { slots } = layout;
 
-  const saved = useMemo(() => readSaved(), []);
+  // Arriving through the globe on the home page beats a view remembered from an earlier visit.
+  const entry = useMemo(() => peekEntry(), []);
+  const saved = useMemo(() => (entry ? null : readSaved()), [entry]);
   const reducedMotion = useMemo(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches, []);
   const coarse = useMemo(() => window.matchMedia('(pointer: coarse)').matches, []);
-  const nav = useMemo(() => new Navigator({ reducedMotion, rtl, restore: saved }), [reducedMotion, rtl, saved]);
+  const nav = useMemo(
+    () => new Navigator({ reducedMotion, rtl, restore: saved, enter: entry }),
+    [reducedMotion, rtl, saved, entry],
+  );
+  useEffect(() => clearEntry(), []); // used up: a reload of this page starts from the opening view
+  const introFrom = useMemo(() => (entry ? viewBasis(entry.yaw, entry.pitch).f : undefined), [entry]);
   const startFilter = saved && categories.some((c) => c.id === saved.filter) ? saved.filter : ALL_ID;
 
   const stateRef = useRef<SphereState>({
@@ -71,7 +80,8 @@ export default function SpherePortfolio({ projects: all, categories, locale }: S
   const hintRef = useRef<HTMLDivElement>(null);
   const dragCancel = useRef(false);
 
-  const [atlas, setAtlas] = useState<Atlas | null>(null);
+  // Already built by the home page's globe? Then the first render has it, and the canvas starts at once.
+  const [atlas, setAtlas] = useState<Atlas | null>(() => peekAtlas(projects, rtl));
   const [ready, setReady] = useState(false);
   const [focus, setFocus] = useState(-1);
   const [shown, setShown] = useState<Slot | null>(null);
@@ -81,14 +91,15 @@ export default function SpherePortfolio({ projects: all, categories, locale }: S
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
+    if (atlas) return undefined;
     let live = true;
-    buildLabelAtlas(projects, root, rtl)
+    getAtlas(projects, root, rtl)
       .then((a) => live && setAtlas(a))
       .catch((e) => console.error('[sphere] label atlas failed', e));
     return () => {
       live = false;
     };
-  }, [projects, rtl]);
+  }, [projects, rtl, atlas]);
 
   // ── actions ────────────────────────────────────────────────
   const focusSlot = useCallback(
@@ -183,7 +194,6 @@ export default function SpherePortfolio({ projects: all, categories, locale }: S
     const st = stateRef.current;
     const pointers = new Map<number, { x: number; y: number }>();
     let down: { x: number; y: number; moved: boolean; pick: number } | null = null;
-    let pinch: { d0: number; z0: number } | null = null;
     const cursor = { x: -100, y: -100, tx: -100, ty: -100, raf: 0, mouse: true, mode: '' };
 
     const ndc = (x: number, y: number): [number, number] => {
@@ -226,8 +236,6 @@ export default function SpherePortfolio({ projects: all, categories, locale }: S
         st.dragging = false;
         st.hover = -1;
         down = null;
-        const [a, b] = [...pointers.values()];
-        pinch = { d0: Math.hypot(a.x - b.x, a.y - b.y) || 1, z0: nav.zoomTarget };
       }
     };
 
@@ -242,11 +250,6 @@ export default function SpherePortfolio({ projects: all, categories, locale }: S
         st.pointer.y = ny;
       }
       if (pointers.has(e.pointerId)) pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-      if (pinch && pointers.size === 2) {
-        const [a, b] = [...pointers.values()];
-        nav.setZoom(pinch.z0 * (pinch.d0 / (Math.hypot(a.x - b.x, a.y - b.y) || 1)));
-        return;
-      }
       if (down) {
         if (!down.moved && Math.hypot(e.clientX - down.x, e.clientY - down.y) > 6) {
           down.moved = true;
@@ -264,7 +267,6 @@ export default function SpherePortfolio({ projects: all, categories, locale }: S
 
     const onUp = (e: PointerEvent) => {
       const had = pointers.delete(e.pointerId);
-      if (pointers.size < 2) pinch = null;
       if (!had || !down) {
         if (!pointers.size) {
           nav.dragEnd(performance.now());
@@ -290,12 +292,8 @@ export default function SpherePortfolio({ projects: all, categories, locale }: S
       cursor.ty = -100;
     };
 
-    const onWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      const dy = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
-      nav.wheel(dy);
-      hintRef.current?.classList.add('is-gone');
-    };
+    // No zooming: the wheel (and a trackpad pinch, which arrives as ctrl + wheel) does nothing here.
+    const onWheel = (e: WheelEvent) => e.preventDefault();
 
     const onKey = (e: KeyboardEvent) => {
       const k = e.key;
@@ -325,8 +323,6 @@ export default function SpherePortfolio({ projects: all, categories, locale }: S
         }
         return;
       }
-      if (k === '+' || k === '=') nav.setZoom(nav.zoomTarget * 0.85);
-      if (k === '-' || k === '_') nav.setZoom(nav.zoomTarget / 0.85);
     };
 
     const LABEL: Record<string, string> = { tile: copy.open, view: copy.view, back: copy.back };
@@ -488,6 +484,7 @@ export default function SpherePortfolio({ projects: all, categories, locale }: S
             slots={slots}
             atlas={atlas}
             rtl={rtl}
+            introFrom={introFrom}
             stateRef={stateRef}
             apiRef={apiRef}
             onReady={() => setReady(true)}

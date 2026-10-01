@@ -25,7 +25,12 @@ export const CONFIG = {
   portraitHFovDeg: 64, // …and on tall phone screens
   minVFov: 52,
   maxVFov: 112,
-  zoomRange: [0.55, 1.3] as [number, number],
+  // There is no zooming. This is the one fixed view: how much wider than `baseHFovDeg` it looks.
+  // Above 1 the screens are smaller and more of the sphere curves round you.
+  viewZoom: 1.3,
+  // The same on tall phone screens. Below 1 the screens are bigger and the sphere is zoomed in, so
+  // they stay readable on a narrow display (1.3 there is clamped at the widest view, `maxVFov`).
+  portraitViewZoom: 0.8,
   autoRotateAfter: 6, // seconds idle before the slow drift starts
   autoRotateSpeed: 0.03, // rad/s
   inertia: 3.2, // higher = stops sooner

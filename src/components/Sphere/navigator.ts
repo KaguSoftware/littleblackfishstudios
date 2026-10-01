@@ -51,6 +51,11 @@ export function baseVFov(aspect: number) {
   return clamp(v, CONFIG.minVFov, CONFIG.maxVFov);
 }
 
+/** The resting view's vertical FOV: `viewZoom` on landscape, the tighter `portraitViewZoom` on phones. */
+export function viewFov(aspect: number) {
+  return baseVFov(aspect) * (aspect < 1 ? CONFIG.portraitViewZoom : CONFIG.viewZoom);
+}
+
 const dot3 = (a: ArrayLike<number>, b: ArrayLike<number>) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 
 /**
@@ -83,7 +88,6 @@ export function orientTo(slot: Slot, qx: number, qy: number): [number, number, n
 export interface SavedView {
   yaw: number;
   pitch: number;
-  zoom: number;
 }
 
 interface Seek {
@@ -93,7 +97,7 @@ interface Seek {
 }
 
 /**
- * All camera behaviour in one plain class: drag with inertia, zoom, idle drift, eased "seek"
+ * All camera behaviour in one plain class: drag with inertia, idle drift, eased "seek"
  * moves and the focus-on-a-screen view. The React layer only feeds it pointer events and reads
  * yaw / pitch / fov.
  *
@@ -116,7 +120,6 @@ export class Navigator implements DragDriver {
   sYaw = 0;
   sPitch = 0;
   sRoll = 0;
-  zoomTarget: number;
   dragging = false;
   idle = 0;
   focus: Slot | null = null;
@@ -129,28 +132,35 @@ export class Navigator implements DragDriver {
     reducedMotion = false,
     rtl = false,
     restore = null,
-  }: { reducedMotion?: boolean; rtl?: boolean; restore?: SavedView | null } = {}) {
+    enter = null,
+  }: { reducedMotion?: boolean; rtl?: boolean; restore?: SavedView | null; enter?: SavedView | null } = {}) {
     this.reducedMotion = reducedMotion;
     this.rtl = rtl;
-    this.zoomTarget = restore ? clamp(restore.zoom, CONFIG.zoomRange[0], CONFIG.zoomRange[1]) : 1;
-    if (restore) {
+    if (enter) {
+      // Arriving from the globe on the home page: you are now inside, facing the way you were
+      // diving. The view starts wider than the resting one and settles, while the screens fly in.
+      this.yaw = enter.yaw;
+      this.pitch = enter.pitch;
+      this.fov = viewFov(this.aspect) * (reducedMotion ? 1 : 1.35);
+      this.seek = null;
+    } else if (restore) {
       // Coming back to the page: land exactly where you left, no fly-in.
       this.yaw = restore.yaw;
       this.pitch = restore.pitch;
-      this.fov = baseVFov(this.aspect) * this.zoomTarget;
+      this.fov = viewFov(this.aspect);
       this.seek = null;
     } else {
-      // Fly in: start turned away and zoomed out, then settle on the front.
+      // Fly in: start turned away and wider than the resting view, then settle on the front.
       this.yaw = reducedMotion ? 0 : -0.95;
       this.pitch = reducedMotion ? 0 : 0.32;
-      this.fov = baseVFov(this.aspect) * (reducedMotion ? 1 : 1.55);
+      this.fov = viewFov(this.aspect) * (reducedMotion ? 1 : 1.2);
       this.seek = reducedMotion ? null : { yaw: 0, pitch: 0, omega: 2.3 };
     }
   }
 
   /** What to remember so the view can be restored later. */
   get view(): SavedView {
-    return { yaw: wrap(this.yaw), pitch: wrap(this.pitch), zoom: this.zoomTarget };
+    return { yaw: wrap(this.yaw), pitch: wrap(this.pitch) };
   }
 
   /** The camera's axes right now. */
@@ -208,23 +218,6 @@ export class Navigator implements DragDriver {
     }
     this.vYaw = clamp(this.vYaw, -8, 8);
     this.vPitch = clamp(this.vPitch, -6, 6);
-  }
-
-  wheel(deltaY: number) {
-    if (this.focus) return;
-    this.zoomTarget = clamp(
-      this.zoomTarget * Math.exp(deltaY * 0.0012),
-      CONFIG.zoomRange[0],
-      CONFIG.zoomRange[1],
-    );
-    this.idle = 0;
-    this.interacted = true;
-  }
-
-  setZoom(z: number) {
-    if (this.focus) return;
-    this.zoomTarget = clamp(z, CONFIG.zoomRange[0], CONFIG.zoomRange[1]);
-    this.idle = 0;
   }
 
   /** Turn by a step the way it reads on screen (right = look right), whichever way up the view is. */
@@ -289,8 +282,7 @@ export class Navigator implements DragDriver {
   update(dtRaw: number, aspect: number) {
     const dt = Math.min(dtRaw, 0.05);
     this.aspect = aspect;
-    const base = baseVFov(aspect);
-    let fovTarget = clamp(base * this.zoomTarget, 28, 112);
+    let fovTarget = clamp(viewFov(aspect), 28, 112);
     let omegaFov = 8;
 
     if (this.focus) {

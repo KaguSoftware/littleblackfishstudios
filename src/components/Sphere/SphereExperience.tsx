@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { Component, useSyncExternalStore } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
 import { SPHERE_COPY } from './copy';
+import { detectWebGL } from './webgl';
 import type { SphereCategory, SphereLocale, SphereProject } from './types';
 
 /**
@@ -38,23 +39,6 @@ const SpherePortfolio = dynamic(() => import('./SpherePortfolio'), {
   ssr: false,
   loading: () => <SphereLoading />,
 });
-
-let webglSupported: boolean | undefined;
-
-/** Probes with a throwaway canvas, once per page load. */
-function detectWebGL(): boolean {
-  if (webglSupported !== undefined) return webglSupported;
-  try {
-    const canvas = document.createElement('canvas');
-    const gl = canvas.getContext('webgl2') ?? canvas.getContext('webgl');
-    webglSupported = gl !== null;
-    // Give the probe context back straight away.
-    gl?.getExtension('WEBGL_lose_context')?.loseContext();
-  } catch {
-    webglSupported = false;
-  }
-  return webglSupported;
-}
 
 // Nothing ever changes, so there is nothing to subscribe to. The server and the hydration
 // render both assume support; if the browser has none, React re-renders right after hydrating.
