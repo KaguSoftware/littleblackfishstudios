@@ -212,14 +212,45 @@ export function buildSlots(projects: SphereProject[]): Layout {
     rings.push(ring);
   });
 
-  if (projects.length > 0) {
-    const assign = assignProjects(slots, projects.length);
+  if (projects.length === 0) return { slots, rings, tile: { W, H, half } };
+
+  // One screen per real project, spread as evenly as possible over the sphere. The full grid
+  // above is only the set of positions to pick from; the rest are dropped (no repeats, no filler).
+  const picked = spreadSubset(slots, projects.length).sort((a, b) => a.lat - b.lat || a.lon - b.lon);
+  const shownRings: Ring[] = [];
+  const shown = picked.map((s, i): Slot => {
+    const ring: Ring = { start: i, count: 1, lat: s.lat, scale: s.scale };
+    shownRings.push(ring);
+    return { ...s, index: i, ring: i, col: 0, seed: hash(i * 12.9898 + 4.1414), ringInfo: ring };
+  });
+  const assign = assignProjects(shown, projects.length);
+  shown.forEach((s, i) => {
+    s.projectIndex = assign[i];
+    s.project = projects[assign[i]];
+  });
+  return { slots: shown, rings: shownRings, tile: { W, H, half } };
+}
+
+/** Farthest-point sampling: k slots whose centres are as spread out over the sphere as possible. */
+function spreadSubset(slots: Slot[], k: number): Slot[] {
+  if (k >= slots.length) return [...slots];
+  const picked = [slots[0]];
+  // closeness[i] = the largest dot product between slot i and any picked slot (higher = nearer)
+  const closeness = slots.map((s) => dot(s.center, slots[0].center));
+  while (picked.length < k) {
+    let best = 0;
+    for (let i = 1; i < slots.length; i++) if (closeness[i] < closeness[best]) best = i;
+    const next = slots[best];
+    picked.push(next);
     slots.forEach((s, i) => {
-      s.projectIndex = assign[i];
-      s.project = projects[assign[i]];
+      closeness[i] = Math.max(closeness[i], dot(s.center, next.center));
     });
   }
-  return { slots, rings, tile: { W, H, half } };
+  return picked;
+}
+
+function dot(a: Vec3, b: Vec3) {
+  return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 }
 
 /**

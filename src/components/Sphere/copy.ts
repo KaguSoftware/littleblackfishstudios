@@ -79,14 +79,14 @@ export interface GlobeCopy {
 export const GLOBE_COPY: Record<SphereLocale, GlobeCopy> = {
   en: {
     kicker: 'Selected work',
-    title: 'Step inside the sphere',
+    title: 'Step into our world',
     cta: 'View projects',
     hint: 'Drag to spin',
     label: 'A globe of our projects. Drag to spin it. Use the View projects button to go inside.',
   },
   fa: {
     kicker: 'نمونه کارها',
-    title: 'به درون کره قدم بگذارید',
+    title: 'به جهان ما قدم بگذارید',
     cta: 'مشاهده پروژه‌ها',
     hint: 'برای چرخاندن بکشید',
     label: 'کره‌ای از پروژه‌های ما. برای چرخاندن بکشید و با دکمه‌ی مشاهده پروژه‌ها وارد آن شوید.',
