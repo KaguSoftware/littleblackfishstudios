@@ -22,7 +22,8 @@ const HeroClient: React.FC<HeroProps> = ({ slides, locale }) => {
 	}, []);
 
 	const scrollToProjects = useCallback(() => {
-		document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" });
+		// the globe is the first thing under the hero; without it (no projects) fall back to the list
+		(document.getElementById("sphere") ?? document.getElementById("projects"))?.scrollIntoView({ behavior: "smooth" });
 	}, []);
 
 	// Track which YouTube slides have been activated (iframe loaded)

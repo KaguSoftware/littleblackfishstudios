@@ -6,38 +6,38 @@ import { useParams } from 'next/navigation';
 
 const content = {
   en: {
-    header: "From Youthful Madness to Timeless Frames",
-    year: "2007",
+    header: "We Build Worlds.",
+    mark: "Little Black Fish",
     acts: [
       {
-        title: "Act I",
-        text: "It all began in the cold winter of 2007; not in equipped studios, but in the heart of limitations. We pursued two distinct paths at Art and Soore Universities: one in Cinema, the other in Theater. Yet, our point of connection was always the same: a rebellious desire for storytelling."
+        title: "Little Black Fish",
+        text: "Little Black Fish is an independent creative studio for storytelling, image and world-building. A place to shape stories, characters and worlds that have their own language and identity. We come from narrative, image, performance and imagination. Cinema, animation, photography, painting, performance and new technologies are not destinations for us; they are media through which an idea can take shape. We do not choose the form in advance. Every world finds its own language and tools."
       },
       {
-        title: "Act II",
-        text: "Years of trial and error, from analyzing frames in harsh locations to writing in challenging days, taught us how to pull imagery and narrative out of darkness. Geographical distance and differing experiences didn't hinder us; they expanded our worldview."
+        title: "Worlds you can enter",
+        text: "Years of experience across different fields of art and storytelling have brought us, today, to a shared point: building worlds that you can enter, believe in and remember. Every project begins with a simple idea. The name Little Black Fish comes from one. A little black fish decides to leave the familiar path. It does not know what waits at the end of the road, and it does not wait to be ready before setting out. It moves with what it has, to see what it has not yet seen and to reach a place it does not yet know. Our way of working is close to this idea. We are not after repeating familiar forms. Every project is an opportunity to discover its own logic, language and identity, from narrative and character to image, motion, space and the tools needed to build its world."
       },
       {
-        title: "Act III",
-        text: "Today, this studio is the result of that long journey. We build the deepest, most vivid images for the silver screen and animation. We turn rebellious dreams into professional reality."
+        title: "Slightly farther than familiar waters",
+        text: "Technology is a tool for us, not an identity. Tools change; what remains is the vision, the story and the world that has been built. A project may begin with an image, a character, a text or even a question. What matters to us is that its starting point has the capacity to keep growing, into a larger world with its own logic, memory and identity, one that can go beyond its origin. Shahnameh: Land of Crown and Legend is one of these experiences: a contemporary encounter with a world that existed centuries before us, and a renewed attempt to find a fresh language for seeing and experiencing it. Little Black Fish was created to make something that does not yet have a ready-made example."
       }
     ]
   },
   fa: {
-    header: "از جنون جوانی تا قاب‌های ماندگار",
-    year: "۱۳۸۶",
+    header: "ما جهان می‌سازیم.",
+    mark: "ماهی سیاه کوچولو",
     acts: [
       {
-        title: "پرده اول",
-        text: "همه‌چیز از زمستان سرد ۱۳۸۶ شروع شد؛ نه در استودیوهای مجهز، بلکه در دل محدودیت‌ها. ما دو مسیر متفاوت را در دانشگاه‌های «هنر» و «سوره» (یکی در سینما و دیگری در تئاتر) طی کردیم، اما نقطه اتصالمان همیشه یک چیز بود: میل سرکش به روایتگری."
+        title: "ماهی سیاه کوچولو",
+        text: "ماهی سیاه کوچولو یک استودیوی خلاقهٔ مستقل برای روایت، تصویر و جهان‌سازی است؛ جایی برای شکل‌دادن به داستان‌ها، شخصیت‌ها و جهان‌هایی که زبان و هویت خودشان را دارند. ما از روایت، تصویر، نمایش و خیال می‌آییم. سینما، انیمیشن، عکاسی، نقاشی، اجرا و فناوری‌های تازه برای ما مقصد نیستند؛ مدیوم‌هایی هستند که یک ایده می‌تواند از طریق آن‌ها شکل بگیرد. فرم را از پیش انتخاب نمی‌کنیم. هر جهان، زبان و ابزار خودش را پیدا می‌کند."
       },
       {
-        title: "پرده دوم",
-        text: "سال‌ها آزمون و خطا، از تحلیل قاب‌ها در لوکیشن‌های سخت تا نوشتن در روزهای پرچالش، به ما آموخت که چگونه از دل تاریکی، تصویر و قصه بیرون بکشیم. فاصله جغرافیایی جهان‌بینی ما را وسعت بخشید."
+        title: "جهان‌هایی که بتوان واردشان شد",
+        text: "سال‌ها تجربه در حوزه‌های مختلف هنر و روایت، امروز در ماهی سیاه کوچولو به یک نقطهٔ مشترک رسیده است: ساختن جهان‌هایی که بتوان واردشان شد، باورشان کرد و به خاطر سپرد. هر پروژه از یک ایدهٔ ساده آغاز می‌شود. نام ماهی سیاه کوچولو از همین ایده می‌آید. ماهی سیاه کوچولو تصمیم می‌گیرد از مسیر آشنا بیرون برود. نمی‌داند در انتهای راه چه چیزی منتظر اوست و برای رفتن هم منتظر کامل‌شدن نمی‌ماند. با همان چیزی که دارد حرکت می‌کند؛ برای دیدن چیزی که پیش از آن ندیده و رسیدن به جایی که هنوز نمی‌شناسد. شیوهٔ کار ما به این ایده نزدیک است. ما به دنبال تکرار فرم‌های آشنا نیستیم. هر پروژه برای ما فرصتی است برای پیدا کردن منطق، زبان و هویت خودش؛ از روایت و شخصیت تا تصویر، حرکت، فضا و ابزارهایی که برای ساخت آن جهان لازم است."
       },
       {
-        title: "پرده سوم",
-        text: "امروز، این استودیو حاصل همان مسیر طولانی است. تیمی که یاد گرفته است عمیق‌ترین و زنده‌ترین تصاویر را برای پرده سینما و جهان انیمیشن بسازد. ما اینجاییم تا رویاهای سرکش را به واقعیت تبدیل کنیم."
+        title: "برای رفتن کمی دورتر از آب‌های آشنا",
+        text: "فناوری برای ما ابزار است، نه هویت. ابزارها تغییر می‌کنند؛ چیزی که باقی می‌ماند نگاه، روایت و جهانی است که ساخته شده. یک پروژه ممکن است با یک تصویر، یک شخصیت، یک متن یا حتی یک سؤال شروع شود. چیزی که برای ما اهمیت دارد ظرفیت نقطهٔ آغازش برای ادامه پیدا کردن و تبدیل‌شدن به جهانی بزرگ‌تر است؛ جهانی با منطق، حافظه و هویت خودش که بتواند فراتر از شاهنامه: سرزمین تاج و افسانه یکی از این تجربه‌هاست؛ مواجههٔ معاصر با جهانی که قرن‌ها پیش از ما وجود داشته و تلاش دوبارهٔ آن برای پیدا کردن زبانی تازه برای دیدن و تجربه‌کردن. ماهی سیاه کوچولو برای ساختن چیزی به وجود آمده که هنوز نمونهٔ آماده‌ای برایش وجود ندارد."
       }
     ]
   }
@@ -89,7 +89,7 @@ const WordByWordHeader = ({ text }: { text: string }) => {
 
 const ProjectedText = ({ text }: { text: string }) => {
   const words = text.split(' ');
-  
+
   const container = {
     hidden: { opacity: 0 },
     visible: {
@@ -137,24 +137,24 @@ export default function AboutPage() {
   const data = content[locale] || content['en'];
 
   return (
-    <div 
-      className="min-h-screen bg-zinc-950 text-zinc-100 overflow-hidden relative selection:bg-zinc-800 selection:text-white" 
+    <div
+      className="min-h-screen bg-zinc-950 text-zinc-100 overflow-hidden relative selection:bg-zinc-800 selection:text-white"
       dir={isRtl ? 'rtl' : 'ltr'}
     >
       {/* Massive Background Typography */}
       <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-0 overflow-hidden">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 0.04, scale: 1 }}
           transition={{ duration: 3, ease: "easeOut" }}
-          className="text-[28vw] md:text-[40vw] font-black text-white select-none leading-none tracking-tighter"
+          className="text-[12vw] md:text-[10vw] font-black text-white select-none leading-none tracking-tighter whitespace-nowrap"
         >
-          {data.year}
+          {data.mark}
         </motion.div>
       </div>
 
       <div className="relative z-10 max-w-6xl mx-auto px-6 pt-40 pb-40">
-        
+
         {/* Header Section */}
         <section className="min-h-[70vh] flex flex-col justify-center max-w-5xl">
           <WordByWordHeader text={data.header} />
@@ -180,7 +180,7 @@ export default function AboutPage() {
                 {/* Act Indicator */}
                 <div className="w-full md:w-1/4 shrink-0 mt-2 md:mt-4">
                   <div className="md:sticky md:top-40">
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, x: isRtl ? 20 : -20 }}
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true, margin: "-20%" }}

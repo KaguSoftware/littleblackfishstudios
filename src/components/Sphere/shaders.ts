@@ -12,10 +12,11 @@ uniform vec3 uUp;
 uniform vec2 uHalf;
 uniform float uRadius;
 uniform float uScale;
+uniform float uFlip;       // 1 = seen from outside the sphere: mirror the picture so it still reads
 varying vec2 vUv;
 
 void main() {
-  vUv = uv;
+  vUv = vec2(mix(uv.x, 1.0 - uv.x, uFlip), uv.y);
   vec2 o = (uv - 0.5) * 2.0 * uHalf * uScale;
   // gnomonic patch: looks perfectly flat from the centre of the sphere
   vec3 q = uCenter + uRight * o.x + uUp * o.y;
@@ -372,5 +373,79 @@ void main() {
   float a = smoothstep(0.5, 0.0, d);
   a *= a;
   gl_FragColor = vec4(vec3(1.0), a * (0.22 + 0.7 * vA));
+}
+`
+
+// ── the globe, seen from outside ─────────────────────────────────────────────────────────────
+// The core is the dark ball the screens sit on. It is opaque, so the far half of the sphere (and
+// its screens) is hidden, and it carries the same fine latitude / longitude grid as the inside.
+
+export const GLOBE_CORE_VERT = /* glsl */ `
+varying vec3 vDir;
+varying vec3 vWorld;
+void main() {
+  vDir = position;
+  vec4 w = modelMatrix * vec4(position, 1.0);
+  vWorld = w.xyz;
+  gl_Position = projectionMatrix * viewMatrix * w;
+}
+`
+
+export const GLOBE_CORE_FRAG = /* glsl */ `
+precision highp float;
+varying vec3 vDir;
+varying vec3 vWorld;
+uniform float uTime;
+float hash21(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+
+void main() {
+  vec3 d = normalize(vDir);
+  vec3 v = normalize(cameraPosition - vWorld);
+  float facing = clamp(dot(d, v), 0.0, 1.0);
+
+  float h = d.y;
+  float lon = atan(d.x, -d.z);
+  float lat = asin(clamp(h, -1.0, 1.0));
+
+  // slow bands of light, so the dark parts between screens are never dead
+  float n = 0.5 + 0.5 * sin(lon * 2.0 + uTime * 0.07 + 2.0 * sin(lat * 3.0 - uTime * 0.05));
+  vec3 col = vec3(0.010) + vec3(0.05) * n * n * (0.4 + 0.6 * smoothstep(-0.3, 0.9, h));
+
+  const float DEG = 0.01745329252;
+  vec2 g = vec2(lon / (15.0 * DEG), lat / (10.0 * DEG));
+  float lonB = atan(-d.x, d.z);
+  float fwx = min(fwidth(lon), fwidth(lonB)) / (15.0 * DEG);
+  vec2 fw = vec2(fwx, fwidth(lat) / (10.0 * DEG));
+  vec2 gd = abs(fract(g - 0.5) - 0.5) / max(fw, vec2(1e-4));
+  float line = 1.0 - min(min(gd.x, gd.y), 1.0);
+  col += vec3(1.0) * line * 0.10 * (1.0 - smoothstep(0.72, 0.98, abs(h)));
+
+  // rim light where the ball turns away from you
+  float rim = pow(1.0 - facing, 3.2);
+  col += vec3(1.0) * rim * 0.42;
+
+  col += (hash21(gl_FragCoord.xy + fract(uTime) * 37.0) - 0.5) * 0.014;
+  gl_FragColor = vec4(col, 1.0);
+}
+`
+
+// A slightly bigger sphere, drawn from the inside, whose rim is the glow around the globe.
+export const GLOBE_HALO_VERT = /* glsl */ `
+varying vec3 vNormal;
+void main() {
+  vNormal = normalize(normalMatrix * normal);
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+`
+
+export const GLOBE_HALO_FRAG = /* glsl */ `
+precision highp float;
+varying vec3 vNormal;
+uniform float uStrength;
+void main() {
+  // 0 at the outer edge, growing toward the globe's own edge
+  float k = clamp(-vNormal.z, 0.0, 1.0);
+  float a = pow(smoothstep(0.0, 0.62, k), 2.4) * uStrength;
+  gl_FragColor = vec4(vec3(1.0), a);
 }
 `

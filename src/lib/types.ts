@@ -53,7 +53,7 @@ export interface Category {
   updated_at: string;
 }
 
-// Serialized (camelCase) shapes returned by serializers — used by components and client code
+// Serialized (camelCase) shapes returned by serializers, used by components and client code
 
 export interface SerializedProject {
   id: string;

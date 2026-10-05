@@ -10,12 +10,10 @@ export const SPHERE_COPY: Record<SphereLocale, SphereCopy> = {
       'Our projects. Drag to look around the sphere, arrow keys to turn, Enter to open a screen, Escape to go back.',
     hintFine: [
       ['Drag', 'to look around'],
-      ['Scroll', 'to zoom'],
       ['Click', 'a screen'],
     ],
     hintTouch: [
       ['Drag', 'to look around'],
-      ['Pinch', 'to zoom'],
       ['Tap', 'a screen'],
     ],
     dragHint: 'Drag to move',
@@ -44,12 +42,10 @@ export const SPHERE_COPY: Record<SphereLocale, SphereCopy> = {
       'پروژه‌های استودیو. برای نگاه کردن به اطراف بکشید، با کلیدهای جهت بچرخید، برای باز کردن یک صفحه Enter و برای بازگشت Escape را بزنید.',
     hintFine: [
       ['بکشید', 'تا اطراف را ببینید'],
-      ['اسکرول', 'برای بزرگ‌نمایی'],
       ['کلیک', 'روی یک صفحه'],
     ],
     hintTouch: [
       ['بکشید', 'تا اطراف را ببینید'],
-      ['دو انگشت', 'برای بزرگ‌نمایی'],
       ['لمس', 'یک صفحه'],
     ],
     dragHint: 'برای حرکت بکشید',
@@ -68,5 +64,31 @@ export const SPHERE_COPY: Record<SphereLocale, SphereCopy> = {
     kindGallery: 'گالری',
     kindImage: 'پروژه',
     inView: 'در دید',
+  },
+};
+
+/** What the globe on the home page says, per locale. */
+export interface GlobeCopy {
+  kicker: string;
+  title: string;
+  cta: string;
+  hint: string;
+  label: string;
+}
+
+export const GLOBE_COPY: Record<SphereLocale, GlobeCopy> = {
+  en: {
+    kicker: 'Selected work',
+    title: 'Step inside the sphere',
+    cta: 'View projects',
+    hint: 'Drag to spin',
+    label: 'A globe of our projects. Drag to spin it. Use the View projects button to go inside.',
+  },
+  fa: {
+    kicker: 'نمونه کارها',
+    title: 'به درون کره قدم بگذارید',
+    cta: 'مشاهده پروژه‌ها',
+    hint: 'برای چرخاندن بکشید',
+    label: 'کره‌ای از پروژه‌های ما. برای چرخاندن بکشید و با دکمه‌ی مشاهده پروژه‌ها وارد آن شوید.',
   },
 };

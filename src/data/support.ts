@@ -20,7 +20,7 @@ export const SUPPORT_PAGE = {
     disclaimer:
       'Support is voluntary and no product or service is provided in return. It is not a purchase, an investment, ownership or commercial sponsorship. It is simply a way to stand behind the making of this project.',
     chooseHeading: 'Choose how to support',
-    iran: { heading: 'Paying from inside Iran', label: 'Support in Rial', caption: 'Iranian bank card' },
+    iran: { heading: 'Paying from inside Iran', label: 'Support in Rial', caption: 'Iranian bank card, desired amount' },
     worldwide: { heading: 'Paying from outside Iran', label: 'Support in Dollars', caption: 'Card, any amount' },
     projectCta: 'Support this project',
     // Shown when no project has the support page switched on
@@ -36,7 +36,7 @@ export const SUPPORT_PAGE = {
     disclaimer:
       'این حمایت داوطلبانه است و در مقابل آن محصول یا خدماتی ارائه نمی‌شود. حمایت مالی به‌معنای خرید، سرمایه‌گذاری، مالکیت یا اسپانسرینگ تجاری نیست؛ فقط همراهی با ادامهٔ ساخت این پروژه است.',
     chooseHeading: 'انتخاب روش حمایت',
-    iran: { heading: 'پرداخت از داخل ایران', label: 'حمایت ریالی', caption: 'کارت بانکی ایرانی' },
+    iran: { heading: 'پرداخت از داخل ایران', label: 'حمایت ریالی', caption: 'کارت بانکی ایرانی، مبلغ دلخواه' },
     worldwide: { heading: 'پرداخت از خارج ایران', label: 'حمایت دلاری', caption: 'کارت بین‌المللی، مبلغ دلخواه' },
     projectCta: 'از این پروژه حمایت کنید',
     studioTitle: 'حمایت از استودیو',

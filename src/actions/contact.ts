@@ -33,7 +33,7 @@ export async function sendContactEmail(formData: FormData) {
       return { success: false, error: 'Please enter a valid phone number' };
     }
 
-    // 1. Persist FIRST. The DB row is the source of truth — the admin can
+    // 1. Persist FIRST. The DB row is the source of truth, the admin can
     //    always recover the lead via the Submissions tab even if email fails.
     const supabase = createServiceClient();
     const { data: inserted, error: insertError } = await supabase
@@ -49,7 +49,7 @@ export async function sendContactEmail(formData: FormData) {
 
     revalidatePath('/[locale]/admin', 'page');
 
-    // 2. Attempt email. A failure here is non-fatal — we still return success
+    // 2. Attempt email. A failure here is non-fatal, we still return success
     //    and just record the failure on the row.
     const apiKey = process.env.RESEND_API_KEY;
     const adminEmail = process.env.ADMIN_CONTACT_EMAIL;
