@@ -25,7 +25,7 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  // Refreshes the session if expired — do not remove
+  // Refreshes the session if expired, do not remove
   await supabase.auth.getUser();
 
   return supabaseResponse;

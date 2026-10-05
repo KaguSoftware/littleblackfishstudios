@@ -55,7 +55,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, locale }) => {
             {isRtl ? 'پیش‌نمایش' : 'No preview'}
           </div>
         )}
-        {/* Arrow overlay — visible at rest on touch, emphasised on hover */}
+        {/* Arrow overlay, visible at rest on touch, emphasised on hover */}
         <motion.div
           className="absolute inset-0 flex items-center justify-center"
           variants={{
