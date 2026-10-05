@@ -46,7 +46,7 @@ export default async function CategoryPage({ params }: Props) {
           locale={locale}
           isRtl={isRtl}
           label={isRtl ? 'بازگشت به پروژه‌ها' : 'Back to Projects'}
-          fallbackHref={`/${locale}#projects`}
+          fallbackHref={`/${locale}/projects`}
         />
 
         <header className="mb-12">

@@ -1,0 +1,377 @@
+/* ============================================================================
+   Sphere portfolio: visual layer.
+
+   - Strictly black & white. Every colour in this file is a neutral grey
+     (R = G = B). Hierarchy comes from opacity and grey levels, never hue.
+   - This is a GLOBAL stylesheet and Tailwind's preflight is active, so every
+     selector is namespaced under .sp- and nothing leans on browser defaults:
+     buttons, headings, lists, anchors and margins are all set explicitly.
+   - RTL (Persian): the root carries dir="rtl". Horizontal placement uses
+     logical properties; tracking and uppercase are switched off (Arabic script
+     breaks with letter-spacing); the display face swaps to Lalezar.
+   ========================================================================== */
+
+.sp-root {
+  /* palette: neutral only */
+  --bg: #000;
+  --ink: #f2f2f2;
+  --dim: rgba(255, 255, 255, 0.6);
+  --faint: rgba(255, 255, 255, 0.45);
+  --hair: rgba(255, 255, 255, 0.14);
+  --glass: rgba(10, 10, 10, 0.55);
+  --accent: #fff;
+  --on-light: #050505; /* text on white surfaces */
+
+  /* type. The --font-* variables come from next/font on an ancestor. */
+  --display: var(--font-bricolage, 'Bricolage Grotesque'), 'Helvetica Neue', Arial, sans-serif;
+  --mono: var(--font-jetbrains, 'JetBrains Mono'), ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --fs-2xs: 9px;
+  --fs-xs: 10px;
+  --fs-sm: 11px;
+  --fs-md: 12px;
+
+  /* layout */
+  --sp-nav: 96px; /* the site's fixed navbar */
+  --sp-gutter: clamp(16px, 3vw, 32px);
+  --sp-flip: 1; /* -1 in RTL: mirrors horizontal slide offsets */
+
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 420px;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: var(--fs-sm);
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1.4;
+  text-align: start;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+  isolation: isolate;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.sp-root *, .sp-root *::before, .sp-root *::after { box-sizing: border-box; }
+/* :where() keeps this at zero specificity so component rules (.sp-chip …) win. */
+:where(.sp-root) button { font: inherit; color: inherit; margin: 0; }
+
+/* ── stage ─────────────────────────────────────────────── */
+.sp-stage {
+  position: absolute; inset: 0;
+  cursor: grab;
+  touch-action: none;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.sp-stage:active { cursor: grabbing; }
+/* An inset box-shadow on the stage itself would sit underneath the opaque canvas,
+   so the keyboard focus ring is an overlay above it (and below the bars). */
+.sp-stage:focus-visible::after {
+  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+.sp-stage canvas { display: block; }
+
+.sp-vignette {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(120% 95% at 50% 50%, transparent 52%, rgba(0, 0, 0, 0.55) 82%, rgba(0, 0, 0, 0.92) 100%);
+}
+
+/* ── cursor halo ───────────────────────────────────────── */
+/* Positioned from JS with a physical translate3d, so left/top stay physical. */
+/* The label text is written from JS; data-mode: idle | tile | view | back | drag. */
+.sp-cursor {
+  position: absolute; left: 0; top: 0; z-index: 4;
+  pointer-events: none; opacity: 0;
+  transition: opacity .2s;
+  will-change: transform;
+}
+.sp-cursor__dot {
+  position: absolute; left: 0; top: 0; width: 46px; height: 46px; margin: -23px 0 0 -23px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0);
+  backdrop-filter: blur(0px); -webkit-backdrop-filter: blur(0px);
+  transform: scale(0.28);
+  transition: transform .28s cubic-bezier(.2, .8, .2, 1), background .28s, border-color .28s, backdrop-filter .28s, -webkit-backdrop-filter .28s;
+}
+.sp-cursor__label {
+  position: absolute; left: 0; top: 0; transform: translate(-50%, -50%);
+  font-size: var(--fs-xs); letter-spacing: .16em; font-weight: 700; white-space: nowrap;
+  color: var(--on-light); opacity: 0; transition: opacity .2s;
+}
+/* over a screen: solid white disc, dark label */
+.sp-cursor[data-mode='tile'] .sp-cursor__dot,
+.sp-cursor[data-mode='view'] .sp-cursor__dot { transform: scale(1.5); background: rgba(255, 255, 255, 0.92); border-color: transparent; }
+.sp-cursor[data-mode='tile'] .sp-cursor__label,
+.sp-cursor[data-mode='view'] .sp-cursor__label { opacity: 1; }
+/* over empty space while a screen is opened: frosted disc, white label */
+.sp-cursor[data-mode='back'] .sp-cursor__dot {
+  transform: scale(1.3); background: rgba(255, 255, 255, 0.14); border-color: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+}
+.sp-cursor[data-mode='back'] .sp-cursor__label { opacity: 1; color: #fff; }
+/* while dragging: a small ring */
+.sp-cursor[data-mode='drag'] .sp-cursor__dot { transform: scale(0.6); background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.7); }
+@media (pointer: coarse) { .sp-cursor { display: none; } }
+
+/* ── top bar ───────────────────────────────────────────── */
+.sp-top, .sp-bottom { position: absolute; inset-inline: 0; z-index: 3; pointer-events: none; }
+.sp-top > *, .sp-bottom > * { pointer-events: auto; }
+.sp-top {
+  top: 0; padding: 22px var(--sp-gutter) 36px;
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.78), rgba(0, 0, 0, 0));
+}
+.sp-brand { display: flex; align-items: center; gap: 14px;  pointer-events: none; /* decoration: screens behind it stay clickable */ }
+.sp-mark { width: 38px; height: 38px; color: var(--ink); flex: none; animation: sp-spin 24s linear infinite; }
+@keyframes sp-spin { to { transform: rotate(360deg); } }
+.sp-kicker { font-size: var(--fs-sm); letter-spacing: .2em; text-transform: uppercase; color: var(--dim); }
+.sp-title {
+  margin: 2px 0 0; font-family: var(--display); font-weight: 800; font-size: clamp(28px, 4.2vw, 44px);
+  line-height: 1; letter-spacing: -0.02em;
+}
+/* preflight gives sub/sup position: relative + line-height 0; be explicit. */
+.sp-title sup {
+  position: static; top: auto; vertical-align: super; line-height: 0;
+  margin-inline-start: 8px;
+  font-family: var(--mono); font-weight: 500; font-size: var(--fs-sm); letter-spacing: .1em; color: var(--dim);
+}
+
+.sp-filters {
+  display: flex; gap: 6px; padding: 5px; border-radius: 999px;
+  background: var(--glass); border: 1px solid var(--hair);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none;
+}
+.sp-filters::-webkit-scrollbar { display: none; }
+.sp-chip {
+  appearance: none; -webkit-appearance: none; margin: 0; border: 0; cursor: pointer; white-space: nowrap;
+  padding: 0 16px; min-height: 36px; border-radius: 999px; background: transparent;
+  font-family: inherit; font-size: var(--fs-sm); line-height: 1.2; letter-spacing: .12em; text-transform: uppercase; color: var(--dim);
+  touch-action: manipulation;
+  transition: background .2s, color .2s;
+}
+.sp-chip[aria-pressed='true'] { background: var(--ink); color: var(--on-light); font-weight: 700; }
+.sp-chip:focus-visible, .sp-icon:focus-visible, .sp-cta:focus-visible, .sp-sr button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ── bottom bar ────────────────────────────────────────── */
+.sp-bottom {
+  bottom: 0; padding: 40px var(--sp-gutter) 22px;
+  display: flex; justify-content: space-between; align-items: flex-end; gap: 16px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0));
+}
+.sp-map {
+  width: clamp(150px, 17vw, 228px);
+  padding: 10px 10px 8px; border-radius: 14px;
+  background: var(--glass); border: 1px solid var(--hair);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+}
+.sp-map__label { font-size: var(--fs-2xs); letter-spacing: .22em; text-transform: uppercase; color: var(--dim); margin-bottom: 7px; }
+.sp-map__cv { display: block; width: 100%; aspect-ratio: 2 / 1; cursor: crosshair; touch-action: none; }
+.sp-info { text-align: end; display: grid; gap: 8px; justify-items: end; transition: opacity .4s; }
+.sp-hint { font-size: var(--fs-sm); letter-spacing: .06em; color: var(--dim); text-wrap: balance; transition: opacity .6s, transform .6s; }
+.sp-hint b { color: var(--ink); font-weight: 700; letter-spacing: .14em; text-transform: uppercase; font-size: var(--fs-xs); }
+.sp-hint.is-gone { opacity: 0; transform: translateY(6px); }
+.sp-hint__touch { display: none; }
+@media (pointer: coarse) { .sp-hint__fine { display: none; } .sp-hint__touch { display: inline; } }
+.sp-root[data-focus='true'] .sp-info { opacity: 0; pointer-events: none; }
+.sp-readout { font-size: var(--fs-xs); letter-spacing: .14em; color: var(--faint); font-variant-numeric: tabular-nums; white-space: pre; }
+
+/* ── detail panel (inline-end side: right in LTR, left in RTL) ───── */
+.sp-panel {
+  position: absolute; z-index: 5;
+  top: calc(var(--sp-nav) + 96px); inset-inline-end: var(--sp-gutter); bottom: 28px;
+  width: min(420px, 34vw); min-width: 300px;
+  padding: 26px 26px 24px; border-radius: 22px;
+  display: flex; flex-direction: column; gap: 14px; overflow-y: auto; overscroll-behavior: contain;
+  scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+  background: linear-gradient(180deg, rgba(20, 20, 20, 0.72), rgba(8, 8, 8, 0.8));
+  border: 1px solid var(--hair);
+  backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  opacity: 0; transform: translateX(calc(28px * var(--sp-flip))); pointer-events: none; visibility: hidden;
+  transition: opacity .45s ease, transform .55s cubic-bezier(.2, .8, .2, 1), visibility 0s linear .55s;
+  user-select: text; -webkit-user-select: text;
+}
+.sp-panel.is-open { opacity: 1; transform: none; pointer-events: auto; visibility: visible; transition-delay: .18s, .18s, 0s; }
+.sp-panel__top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.sp-panel__idx { font-size: var(--fs-sm); letter-spacing: .2em; color: var(--accent); font-variant-numeric: tabular-nums; }
+.sp-panel__nav { display: flex; gap: 8px; }
+.sp-icon {
+  appearance: none; -webkit-appearance: none; margin: 0; padding: 0; width: 44px; height: 44px; border-radius: 50%; cursor: pointer;
+  display: grid; place-items: center; color: var(--ink); background: rgba(255, 255, 255, 0.05); border: 1px solid var(--hair);
+  touch-action: manipulation;
+  transition: background .2s, transform .2s;
+}
+.sp-icon:active { transform: scale(0.94); }
+.sp-panel__title {
+  margin: 6px 0 0; font-family: var(--display); font-weight: 800; letter-spacing: -0.03em;
+  font-size: clamp(38px, 4.6vw, 58px); line-height: .96; text-wrap: balance; overflow-wrap: break-word;
+}
+.sp-panel__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; font-size: var(--fs-sm); letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
+.sp-panel__meta i { flex: none; width: 3px; height: 3px; border-radius: 50%; background: var(--dim); }
+.sp-panel__blurb {
+  margin: 4px 0 0; font-family: var(--display); font-weight: 500; font-size: 17px; line-height: 1.5;
+  color: rgba(255, 255, 255, 0.86); text-wrap: pretty; white-space: pre-line; overflow-wrap: break-word;
+}
+.sp-cta {
+  margin-top: auto; display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  min-height: 52px; padding: 0 22px; border-radius: 999px; text-decoration: none; cursor: pointer;
+  font-size: var(--fs-md); font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+  background: var(--accent); color: var(--on-light); touch-action: manipulation;
+  transition: transform .2s, filter .2s;
+}
+.sp-cta:active { transform: scale(0.98); }
+/* hover only where hover exists, so a tap never leaves a stuck state */
+@media (hover: hover) {
+  .sp-chip:hover { color: var(--ink); background: rgba(255, 255, 255, 0.07); }
+  .sp-chip[aria-pressed='true']:hover { color: var(--on-light); background: var(--ink); }
+  .sp-icon:hover { background: rgba(255, 255, 255, 0.14); }
+  .sp-cta:hover { filter: brightness(0.9); transform: translateY(-1px); }
+}
+
+/* ── loader ────────────────────────────────────────────── */
+.sp-loader {
+  position: absolute; inset: 0; z-index: 10; display: grid; place-content: center; justify-items: center; gap: 18px;
+  background: var(--bg); font-size: var(--fs-sm); letter-spacing: .28em; text-transform: uppercase; color: var(--dim);
+  transition: opacity .45s ease, visibility 0s linear .5s;
+}
+.sp-loader.is-done { opacity: 0; visibility: hidden; pointer-events: none; }
+.sp-loader__ring { width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid rgba(255, 255, 255, 0.14); border-top-color: var(--ink); animation: sp-spin 1s linear infinite; }
+
+/* ── drag hint (phones) ────────────────────────────────── */
+/* Covers exactly the stage, above the canvas, below the bars and the panel.
+   The ghost finger and its trail are positioned from JS (translate3d in stage px),
+   so nothing here animates their transform. */
+.sp-drag {
+  position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  animation: sp-drag-in .8s ease .25s backwards;
+  transition: opacity .5s ease, visibility 0s;
+}
+.sp-drag.is-gone { opacity: 0; visibility: hidden; animation: none; transition: opacity .5s ease, visibility 0s linear .5s; }
+.sp-drag__finger {
+  position: absolute; left: 0; top: 0; width: 56px; height: 56px; margin: -28px 0 0 -28px;
+  opacity: 0; will-change: transform, opacity;
+}
+/* ring (scales on press; the finger's own transform belongs to JS) */
+.sp-drag__finger::before {
+  content: ''; position: absolute; inset: 0; border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.6); background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  transition: transform .22s cubic-bezier(.2, .8, .2, 1), background .22s, border-color .22s;
+}
+/* dot */
+.sp-drag__finger::after {
+  content: ''; position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.78);
+  transition: transform .22s cubic-bezier(.2, .8, .2, 1), background .22s, box-shadow .22s;
+}
+.sp-drag__finger.is-down::before { transform: scale(0.78); background: rgba(255, 255, 255, 0.2); border-color: rgba(255, 255, 255, 0.85); }
+.sp-drag__finger.is-down::after { transform: scale(1.12); background: #fff; box-shadow: 0 0 16px 4px rgba(255, 255, 255, 0.5), 0 0 3px 1px rgba(255, 255, 255, 0.9); }
+/* three lagging dots behind the finger; size and opacity are set from JS */
+.sp-drag__trail {
+  position: absolute; left: 0; top: 0; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%;
+  background: #fff; opacity: 0; will-change: transform, opacity;
+}
+/* caption pill in the lower third. direction: ltr keeps the chevrons pointing
+   outward in both locales; the caption itself is dir="auto". */
+.sp-drag__label {
+  position: absolute; inset-inline: 0; bottom: max(104px, 20%);
+  width: max-content; max-width: calc(100% - 32px); margin-inline: auto;
+  display: flex; align-items: center; gap: 10px; direction: ltr;
+  padding: 9px 16px; border-radius: 999px;
+  background: rgba(10, 10, 10, 0.6); border: 1px solid var(--hair);
+  font-size: var(--fs-sm); letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; color: var(--ink);
+  animation: sp-drag-pulse 2.6s ease-in-out infinite;
+}
+.sp-drag__chev { flex: none; width: 14px; height: 14px; opacity: .8; animation: sp-drag-nudge-start 2.6s ease-in-out infinite; }
+.sp-drag__chev--end { animation-name: sp-drag-nudge-end; }
+@keyframes sp-drag-in { from { opacity: 0; } }
+@keyframes sp-drag-pulse { 0%, 100% { opacity: .66; } 50% { opacity: 1; } }
+@keyframes sp-drag-nudge-start { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(-3px); } }
+@keyframes sp-drag-nudge-end { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(3px); } }
+
+/* ── a11y ──────────────────────────────────────────────── */
+.sp-sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; list-style: none; }
+.sp-sr:focus-within { clip: auto; width: auto; height: auto; inset-inline-start: 16px; bottom: 80px; margin: 0; z-index: 9; overflow: visible; }
+.sp-sr:focus-within li { display: none; }
+.sp-sr li:focus-within { display: block; }
+.sp-sr button { padding: 10px 14px; background: var(--ink); color: var(--on-light); border: 0; border-radius: 10px; font-size: var(--fs-md); cursor: pointer; }
+
+/* ── under the site navbar (96px, z-50) ─────────────────── */
+/* >= 768px the navbar is transparent with a gradient: the stage stays full-bleed
+   and only the top bar makes room for it. */
+@media (min-width: 768px) {
+  .sp-top { padding-top: calc(var(--sp-nav) + 22px); }
+}
+/* With the side panel, the top bar stays on one row (the filter pill scrolls inside
+   itself instead of wrapping), so its height is fixed and the panel's top offset
+   always clears it, however many categories there are. */
+@media (min-width: 761px) {
+  .sp-top { flex-wrap: nowrap; }
+  .sp-brand { flex: none; }
+  .sp-filters { min-width: 0; }
+}
+/* < 768px the navbar is opaque black: everything starts below it. */
+@media (max-width: 767.98px) {
+  .sp-stage, .sp-top, .sp-drag, .sp-loader { top: var(--sp-nav); }
+}
+
+/* ── small screens: sheet instead of side panel ───────── */
+@media (max-width: 760px) {
+  .sp-top { padding-top: 16px; gap: 10px; }
+  .sp-mark { width: 30px; height: 30px; }
+  .sp-filters { width: 100%; }
+  .sp-map { display: none; }
+  .sp-bottom { justify-content: center; padding-bottom: 14px; }
+  .sp-info { text-align: center; justify-items: center; }
+  .sp-readout { display: none; }
+  .sp-panel {
+    top: auto; inset-inline: 12px; bottom: 12px; width: auto; min-width: 0; max-height: 46%;
+    padding: 18px 18px 16px; gap: 10px; border-radius: 20px; transform: translateY(24px);
+  }
+  .sp-panel__title { font-size: 34px; }
+  .sp-panel__blurb { font-size: 15px; }
+  .sp-cta { min-height: 48px; }
+}
+
+/* ── RTL (Persian) ─────────────────────────────────────── */
+.sp-root[dir='rtl'] {
+  --sp-flip: -1;
+  --display: var(--font-lalezar, 'Lalezar'), Tahoma, sans-serif;
+  --mono: ui-sans-serif, Tahoma, sans-serif;
+  /* Persian glyphs run smaller than tracked uppercase Latin at the same size */
+  --fs-2xs: 10px;
+  --fs-xs: 11px;
+  --fs-sm: 12px;
+  --fs-md: 13px;
+  line-height: 1.6;
+}
+/* no tracking, no uppercase anywhere (beats every single-class rule above) */
+.sp-root[dir='rtl'] *, .sp-root[dir='rtl'] *::before, .sp-root[dir='rtl'] *::after { letter-spacing: 0; text-transform: none; }
+/* Lalezar ships a single weight (400): asking for more only produces faux bold. */
+.sp-root[dir='rtl'] .sp-title,
+.sp-root[dir='rtl'] .sp-panel__title,
+.sp-root[dir='rtl'] .sp-panel__blurb { font-weight: 400; }
+.sp-root[dir='rtl'] .sp-title { line-height: 1.2; margin-top: 0; }
+.sp-root[dir='rtl'] .sp-panel__title { line-height: 1.25; }
+.sp-root[dir='rtl'] .sp-panel__blurb { line-height: 1.75; }
+
+/* ── reduced motion ────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .sp-mark, .sp-loader__ring { animation: none; }
+  .sp-panel, .sp-panel.is-open, .sp-loader, .sp-hint, .sp-info, .sp-cursor__dot, .sp-chip, .sp-icon, .sp-cta,
+  .sp-drag, .sp-drag.is-gone, .sp-drag__finger::before, .sp-drag__finger::after {
+    transition-duration: .01ms; transition-delay: 0s;
+  }
+  .sp-drag, .sp-drag__label, .sp-drag__chev { animation: none; }
+}
+/* the same, when the parent turns motion off through the prop */
+.sp-drag.is-still, .sp-drag.is-still .sp-drag__label, .sp-drag.is-still .sp-drag__chev { animation: none; }

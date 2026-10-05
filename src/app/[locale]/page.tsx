@@ -9,6 +9,10 @@ import {
 	serializeCategory,
 } from "@/lib/serializers";
 import { getYouTubeMaxResThumbnail } from "@/lib/youtube";
+import { buildSphereData } from "@/lib/sphere";
+import HomeGlobe from "@/components/Sphere/HomeGlobe";
+import { sphereFontVars } from "@/components/Sphere/fonts";
+import type { SphereLocale } from "@/components/Sphere/types";
 
 export const revalidate = 3600;
 
@@ -44,6 +48,7 @@ export default async function HomePage({ params }: HomePageProps) {
 		posterUrl: posterFor(row.image_url),
 	}));
 	const categories = categoryRows.map(serializeCategory);
+	const sphere = buildSphereData(projects, categories, locale as SphereLocale);
 
 	const projectsByCategory = new Map<string, typeof projects>();
 	for (const p of projects) {
@@ -62,6 +67,11 @@ export default async function HomePage({ params }: HomePageProps) {
 		<main className="min-h-screen bg-black">
 			{/* Cinematic Hero Section */}
 			<Hero slides={slides} locale={locale} />
+
+			{/* The globe: the projects sphere seen from outside, and the way into it */}
+			<div className={sphereFontVars}>
+				<HomeGlobe projects={sphere.projects} locale={locale as SphereLocale} />
+			</div>
 
 			{/* Content Section */}
 			<div

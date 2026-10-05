@@ -14,7 +14,7 @@ export default function Footer({ locale }: { locale: string }) {
   const year = new Date().getFullYear();
 
   const navLinks = [
-    { href: `/${locale}/#projects`, label: isRtl ? 'پروژه‌ها' : 'Projects' },
+    { href: `/${locale}/projects`, label: isRtl ? 'پروژه‌ها' : 'Projects' },
     { href: `/${locale}/about`, label: isRtl ? 'درباره ما' : 'About' },
     { href: `/${locale}/contact`, label: isRtl ? 'تماس' : 'Contact' },
     { href: `/${locale}/support`, label: isRtl ? 'حمایت' : 'Support' },
