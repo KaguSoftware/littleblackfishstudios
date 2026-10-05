@@ -16,6 +16,9 @@ import type { SphereLocale } from "@/components/Sphere/types";
 
 export const revalidate = 3600;
 
+// Hides the "Recent Projects" section on the home page. Flip to true to show it again.
+const SHOW_RECENT_PROJECTS = false;
+
 interface HomePageProps {
 	params: Promise<{ locale: string }>;
 }
@@ -74,6 +77,7 @@ export default async function HomePage({ params }: HomePageProps) {
 			</div>
 
 			{/* Content Section */}
+			{SHOW_RECENT_PROJECTS && (
 			<div
 				id="projects"
 				className="mx-auto max-w-7xl px-4 py-12 md:py-24 sm:px-6 lg:px-8 scroll-mt-28 md:scroll-mt-24"
@@ -129,6 +133,7 @@ export default async function HomePage({ params }: HomePageProps) {
 					</div>
 				)}
 			</div>
+			)}
 		</main>
 	);
 }
