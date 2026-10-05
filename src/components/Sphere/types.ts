@@ -16,6 +16,8 @@ export interface SphereProject {
   href: string;
   /** Raw poster URL (YouTube thumbnail or Supabase image). The engine routes it through /_next/image. */
   image: string | null;
+  /** The project's other uploaded photos, tried in turn if the poster fails to load. */
+  galleryImages: string[];
   /** Optional short looping clip. Plays instead of the poster when present. */
   video: string | null;
   /** Procedural fallback animation, 0-9, shown until the poster loads. */

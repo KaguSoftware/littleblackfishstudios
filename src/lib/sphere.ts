@@ -113,6 +113,7 @@ export function buildSphereData(
         blurb: toBlurb(locale === 'fa' ? project.descriptionFa : project.descriptionEn),
         href: `/${locale}/projects/${project.slug}`,
         image: getYouTubeMaxResThumbnail(project.youtubeUrl) || project.imageUrl || null,
+        galleryImages: (project.galleryUrls ?? []).slice(0, 4),
         video: null,
         scene: index % 10,
         palette: [...PALETTES[index % PALETTES.length]],

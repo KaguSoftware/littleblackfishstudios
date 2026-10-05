@@ -10,15 +10,23 @@ export function posterUrl(src: string, width: number) {
 /** YouTube only makes the 1280×720 still for some videos; every video has the 320×180 one. */
 const YT_MAXRES = /^(https:\/\/img\.youtube\.com\/vi\/[\w-]{11}\/)maxresdefault\.jpg$/;
 
-/** Where to try to get a poster from, best first. */
-function posterCandidates(src: string, width: number) {
-  const list = [posterUrl(src, width), src];
-  const yt = YT_MAXRES.exec(src);
-  if (yt) {
-    const small = `${yt[1]}mqdefault.jpg`;
-    list.push(posterUrl(small, width), small);
+/** Where to try to get a poster from, best first: each source in turn (main image, then gallery). */
+function posterCandidates(srcs: string[], width: number) {
+  const list: string[] = [];
+  for (const src of srcs) {
+    list.push(posterUrl(src, width), src);
+    const yt = YT_MAXRES.exec(src);
+    if (yt) {
+      const small = `${yt[1]}mqdefault.jpg`;
+      list.push(posterUrl(small, width), small);
+    }
   }
   return list;
+}
+
+/** The poster and then the gallery photos, in the order they are tried. */
+function imageSources(project: SphereProject) {
+  return [project.image, ...project.galleryImages].filter((s): s is string => !!s);
 }
 
 /** How many poster fetches run at once. */
@@ -68,16 +76,16 @@ export class MediaPool {
     let it = this.items.get(project.id);
     if (!it) {
       if (this.inflight >= MAX_INFLIGHT) return null;
-      it = project.video ? this.loadVideo(project.video) : this.loadImage(project.image as string, width);
+      it = project.video ? this.loadVideo(project.video) : this.loadImage(imageSources(project), width);
       this.items.set(project.id, it);
     } else if (it.kind === 'image' && it.ready && !it.upgrading && it.width < width && project.image && this.inflight < MAX_INFLIGHT) {
-      this.loadImage(project.image, width, it);
+      this.loadImage(imageSources(project), width, it);
     }
     return it;
   }
 
-  /** Fetches a poster. Given `into`, it is an upgrade: a failure leaves the poster already shown alone. */
-  private loadImage(src: string, width: number, into?: MediaItem): MediaItem {
+  /** Fetches a poster, trying each source in turn. Given `into`, it is an upgrade: a failure leaves the poster already shown alone. */
+  private loadImage(srcs: string[], width: number, into?: MediaItem): MediaItem {
     const it: MediaItem =
       into ?? { kind: 'image', texture: null, video: null, ready: false, failed: false, aspect: 16 / 9, playing: false, width: 0, upgrading: false };
     if (into) it.upgrading = true;
@@ -89,7 +97,7 @@ export class MediaPool {
         this.inflight--;
       }
     };
-    const attempts = posterCandidates(src, width);
+    const attempts = posterCandidates(srcs, width);
     const tryNext = () => {
       const url = attempts.shift();
       if (!url || this.disposed) {
