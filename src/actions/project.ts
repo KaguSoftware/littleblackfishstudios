@@ -3,14 +3,7 @@
 import { createServiceClient, requireAdminUser } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { getYouTubeId } from '@/lib/youtube';
-
-function generateSlug(title: string) {
-  return title
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)+/g, '');
-}
+import { cleanText, cleanUrl, cleanUrlList, slugify } from '@/lib/validate';
 
 function processImageUrl(imageUrl: string | null, youtubeUrl: string | null) {
   if ((!imageUrl || imageUrl.trim() === '') && youtubeUrl) {
@@ -76,20 +69,26 @@ export async function createProject(data: {
   await requireAdminUser();
   try {
     const supabase = createServiceClient();
-    const finalImageUrl = processImageUrl(data.imageUrl || null, data.youtubeUrl || null);
-    const slug = `${generateSlug(data.titleEn)}-${Date.now()}`;
+    const titleEn = cleanText(data.titleEn, 200);
+    const titleFa = cleanText(data.titleFa, 200);
+    if (!titleEn || !titleFa) return { success: false, error: 'Both titles are required' };
+
+    const youtubeUrl = cleanUrl(data.youtubeUrl);
+    const finalImageUrl = processImageUrl(cleanUrl(data.imageUrl), youtubeUrl);
+    // The slug is fixed at creation so project URLs never change when the title is edited
+    const slug = `${slugify(titleEn) || 'project'}-${Date.now()}`;
 
     const { error } = await supabase.from('projects').insert({
       slug,
-      title_en: data.titleEn,
-      title_fa: data.titleFa,
-      description_en: data.descriptionEn ?? null,
-      description_fa: data.descriptionFa ?? null,
-      youtube_url: data.youtubeUrl ?? null,
+      title_en: titleEn,
+      title_fa: titleFa,
+      description_en: cleanText(data.descriptionEn, 20000) || null,
+      description_fa: cleanText(data.descriptionFa, 20000) || null,
+      youtube_url: youtubeUrl,
       image_url: finalImageUrl,
       published: data.published,
-      media_type: data.mediaType ?? 'youtube',
-      gallery_urls: data.galleryUrls ?? [],
+      media_type: cleanText(data.mediaType, 20) || 'youtube',
+      gallery_urls: cleanUrlList(JSON.stringify(data.galleryUrls ?? [])),
       category_id: data.categoryId ?? null,
       order: 0,
       ...(data.support ? readSupportFields(data.support) : {}),
@@ -110,19 +109,19 @@ export async function updateProject(id: string, formData: FormData) {
   await requireAdminUser();
   try {
     const supabase = createServiceClient();
-    const titleEn = formData.get('titleEn') as string;
-    const titleFa = formData.get('titleFa') as string;
-    const descriptionEn = formData.get('descriptionEn') as string;
-    const descriptionFa = formData.get('descriptionFa') as string;
-    const youtubeUrl = formData.get('youtubeUrl') as string;
-    const imageUrl = formData.get('imageUrl') as string;
-    const mediaType = (formData.get('mediaType') as string) || 'youtube';
-    const galleryUrls: string[] = JSON.parse((formData.get('galleryUrls') as string) || '[]');
+    const titleEn = cleanText(formData.get('titleEn'), 200);
+    const titleFa = cleanText(formData.get('titleFa'), 200);
+    if (!titleEn || !titleFa) return { success: false, error: 'Both titles are required' };
+    const descriptionEn = cleanText(formData.get('descriptionEn'), 20000);
+    const descriptionFa = cleanText(formData.get('descriptionFa'), 20000);
+    const youtubeUrl = cleanUrl(formData.get('youtubeUrl'));
+    const imageUrl = cleanUrl(formData.get('imageUrl'));
+    const mediaType = cleanText(formData.get('mediaType'), 20) || 'youtube';
+    const galleryUrls = cleanUrlList(formData.get('galleryUrls'));
     const categoryIdRaw = formData.get('categoryId') as string | null;
     const categoryId = categoryIdRaw && categoryIdRaw.length > 0 ? categoryIdRaw : null;
 
     const finalImageUrl = processImageUrl(imageUrl, youtubeUrl);
-    const slug = generateSlug(titleEn);
 
     const { error } = await supabase.from('projects').update({
       title_en: titleEn,
@@ -131,7 +130,6 @@ export async function updateProject(id: string, formData: FormData) {
       description_fa: descriptionFa || null,
       youtube_url: youtubeUrl || null,
       image_url: finalImageUrl,
-      slug,
       media_type: mediaType,
       gallery_urls: galleryUrls,
       category_id: categoryId,
@@ -180,15 +178,17 @@ export async function deleteProject(id: string) {
       }
     }
 
+    // Delete the row first: if this fails nothing is lost. Orphaned files are the lesser evil.
+    const { error: deleteError } = await supabase.from('projects').delete().eq('id', id);
+    if (deleteError) throw deleteError;
+
+    // Row is gone, now remove its files from storage
     if (pathsToDelete.length > 0) {
       const { error: storageError } = await supabase.storage
         .from('projects')
         .remove(pathsToDelete);
       if (storageError) console.error('Failed to delete project storage files:', storageError);
     }
-
-    const { error: deleteError } = await supabase.from('projects').delete().eq('id', id);
-    if (deleteError) throw deleteError;
 
     revalidatePath('/[locale]', 'layout');
     revalidatePath('/[locale]/admin', 'page');

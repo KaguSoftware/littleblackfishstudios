@@ -1,13 +1,15 @@
 import { createServerClient as createSupabaseServerClient, type CookieOptions } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
+import { supabasePublicEnv, supabaseServiceKey } from '@/lib/env';
 
 export async function createServerClient() {
   const cookieStore = await cookies();
+  const { url, key } = supabasePublicEnv();
 
   return createSupabaseServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    url,
+    key,
     {
       cookies: {
         getAll() {
@@ -32,9 +34,10 @@ export async function createServerClient() {
 const ANON_TIMEOUT_MS = 4000;
 
 export function createAnonClient() {
+  const { url, key } = supabasePublicEnv();
   return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    url,
+    key,
     {
       auth: { persistSession: false },
       global: {
@@ -47,8 +50,8 @@ export function createAnonClient() {
 
 export function createServiceClient() {
   return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    supabasePublicEnv().url,
+    supabaseServiceKey(),
     { auth: { persistSession: false } }
   );
 }

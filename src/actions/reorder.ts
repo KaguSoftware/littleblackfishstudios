@@ -9,6 +9,14 @@ export async function updateOrder(
 ) {
   await requireAdminUser();
   try {
+    // Only well-formed rows reach the database
+    const rows = (Array.isArray(items) ? items : []).filter(
+      (i) => i && typeof i.id === 'string' && Number.isInteger(i.order),
+    );
+    if (rows.length === 0 || rows.length !== items.length) {
+      return { success: false, error: 'Invalid order data' };
+    }
+
     const supabase = createServiceClient();
     const table =
       model === 'project'
@@ -18,7 +26,7 @@ export async function updateOrder(
           : 'categories';
 
     const results = await Promise.all(
-      items.map(({ id, order }) =>
+      rows.map(({ id, order }) =>
         supabase.from(table).update({ order }).eq('id', id)
       )
     );

@@ -90,6 +90,8 @@ export default function ContactPage() {
           </motion.div>
 
           <form onSubmit={handleSubmit} className="space-y-8">
+            {/* honeypot: hidden from people, bots fill it in */}
+            <input name="website" type="text" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
             <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-3">
                 <label className={labelCls}>{t('name')}</label>

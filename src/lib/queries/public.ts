@@ -18,6 +18,10 @@ const fallback = snapshot as unknown as {
   categories: Category[];
 };
 
+// Everything except the long support-page text, which only /support needs.
+const LIST_COLUMNS =
+  'id, slug, youtube_url, image_url, media_type, gallery_urls, published, title_en, title_fa, description_en, description_fa, category_id, "order", created_at, updated_at, support_enabled';
+
 const byOrder = <T extends { order: number }>(a: T, b: T) => a.order - b.order;
 
 const snapshotProjects = () => fallback.projects.filter((p) => p.published).sort(byOrder);
@@ -47,7 +51,7 @@ export const getHomeData = cache(async () => {
   const [projects, categories] = await Promise.all([
     withFallback<Project>(
       'projects',
-      supabase.from('projects').select('*').eq('published', true).order('order', { ascending: true }),
+      supabase.from('projects').select(LIST_COLUMNS).eq('published', true).order('order', { ascending: true }),
       snapshotProjects,
     ),
     withFallback<Category>(
@@ -74,7 +78,7 @@ export async function getProjectsByCategory(categoryId: string): Promise<Project
     `projects in ${categoryId}`,
     createAnonClient()
       .from('projects')
-      .select('*')
+      .select(LIST_COLUMNS)
       .eq('published', true)
       .eq('category_id', categoryId)
       .order('order', { ascending: true }),
@@ -87,7 +91,7 @@ export async function getProjectsByCategory(categoryId: string): Promise<Project
 export const getProjectBySlug = cache(async (slug: string): Promise<Project | null> => {
   const rows = await withFallback<Project>(
     `project ${slug}`,
-    createAnonClient().from('projects').select('*').eq('slug', slug).eq('published', true).limit(1),
+    createAnonClient().from('projects').select(LIST_COLUMNS).eq('slug', slug).eq('published', true).limit(1),
     () => snapshotProjects().filter((p) => p.slug === slug),
   );
   return rows[0] ?? null;

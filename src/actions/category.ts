@@ -2,25 +2,22 @@
 
 import { createServiceClient, requireAdminUser } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
-
-function generateSlug(name: string) {
-  return name
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)+/g, '');
-}
+import { cleanText, slugify } from '@/lib/validate';
 
 export async function createCategory(data: { nameEn: string; nameFa: string }) {
   await requireAdminUser();
   try {
     const supabase = createServiceClient();
-    const slug = `${generateSlug(data.nameEn) || 'category'}-${Date.now()}`;
+    const nameEn = cleanText(data.nameEn, 100);
+    const nameFa = cleanText(data.nameFa, 100);
+    if (!nameEn || !nameFa) return { success: false, error: 'Both names are required' };
+    // The slug is fixed at creation so category URLs never change when the name is edited
+    const slug = `${slugify(nameEn) || 'category'}-${Date.now()}`;
 
     const { error } = await supabase.from('categories').insert({
       slug,
-      name_en: data.nameEn,
-      name_fa: data.nameFa,
+      name_en: nameEn,
+      name_fa: nameFa,
       order: 0,
       visible: true,
     });
@@ -40,8 +37,8 @@ export async function updateCategory(id: string, formData: FormData) {
   await requireAdminUser();
   try {
     const supabase = createServiceClient();
-    const nameEn = formData.get('nameEn') as string;
-    const nameFa = formData.get('nameFa') as string;
+    const nameEn = cleanText(formData.get('nameEn'), 100);
+    const nameFa = cleanText(formData.get('nameFa'), 100);
 
     if (!nameEn || !nameFa) {
       return { success: false, error: 'Both names are required' };
@@ -52,7 +49,6 @@ export async function updateCategory(id: string, formData: FormData) {
       .update({
         name_en: nameEn,
         name_fa: nameFa,
-        slug: generateSlug(nameEn),
       })
       .eq('id', id);
 

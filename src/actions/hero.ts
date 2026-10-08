@@ -2,6 +2,7 @@
 
 import { createServiceClient, requireAdminUser } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { cleanInt, cleanText, cleanUrl } from '@/lib/validate';
 
 function extractStoragePath(url: string, bucket: string): string | null {
   const marker = `/object/public/${bucket}/`;
@@ -18,13 +19,13 @@ export async function createHeroSlide(formData: FormData) {
   await requireAdminUser();
   try {
     const supabase = createServiceClient();
-    const titleEn = (formData.get('titleEn') as string) || null;
-    const titleFa = (formData.get('titleFa') as string) || null;
-    const subtitleEn = (formData.get('subtitleEn') as string) || null;
-    const subtitleFa = (formData.get('subtitleFa') as string) || null;
-    const order = parseInt(formData.get('order') as string) || 0;
-    const imageUrl = (formData.get('imageUrl') as string) || null;
-    const youtubeUrl = (formData.get('youtubeUrl') as string) || null;
+    const titleEn = cleanText(formData.get('titleEn'), 200) || null;
+    const titleFa = cleanText(formData.get('titleFa'), 200) || null;
+    const subtitleEn = cleanText(formData.get('subtitleEn'), 500) || null;
+    const subtitleFa = cleanText(formData.get('subtitleFa'), 500) || null;
+    const order = cleanInt(formData.get('order'));
+    const imageUrl = cleanUrl(formData.get('imageUrl'));
+    const youtubeUrl = cleanUrl(formData.get('youtubeUrl'));
 
     if (!imageUrl && !youtubeUrl) throw new Error('Image or YouTube URL is required');
 
@@ -100,13 +101,13 @@ export async function updateHeroSlide(id: string, formData: FormData) {
   await requireAdminUser();
   try {
     const supabase = createServiceClient();
-    const titleEn = (formData.get('titleEn') as string) || null;
-    const titleFa = (formData.get('titleFa') as string) || null;
-    const subtitleEn = (formData.get('subtitleEn') as string) || null;
-    const subtitleFa = (formData.get('subtitleFa') as string) || null;
-    const order = parseInt(formData.get('order') as string) || 0;
-    const imageUrl = (formData.get('imageUrl') as string) || null;
-    const youtubeUrl = (formData.get('youtubeUrl') as string) || null;
+    const titleEn = cleanText(formData.get('titleEn'), 200) || null;
+    const titleFa = cleanText(formData.get('titleFa'), 200) || null;
+    const subtitleEn = cleanText(formData.get('subtitleEn'), 500) || null;
+    const subtitleFa = cleanText(formData.get('subtitleFa'), 500) || null;
+    const order = cleanInt(formData.get('order'));
+    const imageUrl = cleanUrl(formData.get('imageUrl'));
+    const youtubeUrl = cleanUrl(formData.get('youtubeUrl'));
 
     const { error } = await supabase
       .from('hero_slides')

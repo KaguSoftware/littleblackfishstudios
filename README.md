@@ -19,7 +19,7 @@ Requires Node 22 (see `.nvmrc`).
 
 ```bash
 npm install
-# create .env.local (variables below)
+cp .env.example .env.local   # then fill in the values (table below)
 npm run dev                  # http://localhost:3000
 ```
 
@@ -66,6 +66,8 @@ scripts/snapshot-db.mjs   Rebuilds the fallback snapshot
 ```
 
 ## How it works
+
+**Hero slides** are read from `src/data/fallback.json` only (the videos live in `public/videos`), not from the database. Editing slides in the admin does not change the public site until you re-run the snapshot script and redeploy.
 
 **Content and fallback.** All public content (projects, hero slides, categories) lives in Supabase. If Supabase errors or times out, `src/lib/queries/public.ts` serves the same data from `src/data/fallback.json` so the site stays up. Run `scripts/snapshot-db.mjs` after meaningful content changes to refresh the snapshot. It also downloads the images to `public/fallback/`. It can read from the live DB or from CSV exports with `--from-csv`.
 

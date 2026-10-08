@@ -7,6 +7,11 @@ import { revalidatePath } from 'next/cache';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_RE = /^\+?[0-9\s()\-]{7,20}$/;
 
+// Spam limits: per sender and across the whole form, within a short window
+const WINDOW_MS = 10 * 60 * 1000;
+const MAX_PER_EMAIL = 3;
+const MAX_TOTAL = 30;
+
 function escapeHtml(str: string): string {
   return str
     .replace(/&/g, '&amp;')
@@ -23,6 +28,11 @@ export async function sendContactEmail(formData: FormData) {
     const phone = (formData.get('phone') as string | null)?.trim() ?? '';
     const message = (formData.get('message') as string | null)?.trim() ?? '';
 
+    // Hidden field a real visitor never fills in. Pretend it worked so bots don't retry.
+    if ((formData.get('website') as string | null)?.trim()) {
+      return { success: true };
+    }
+
     if (!name || !email || !phone || !message) {
       return { success: false, error: 'All fields are required' };
     }
@@ -32,10 +42,23 @@ export async function sendContactEmail(formData: FormData) {
     if (!PHONE_RE.test(phone)) {
       return { success: false, error: 'Please enter a valid phone number' };
     }
+    if (name.length > 100 || email.length > 254 || message.length > 5000) {
+      return { success: false, error: 'One of the fields is too long' };
+    }
 
     // 1. Persist FIRST. The DB row is the source of truth, the admin can
     //    always recover the lead via the Submissions tab even if email fails.
     const supabase = createServiceClient();
+
+    const since = new Date(Date.now() - WINDOW_MS).toISOString();
+    const [{ count: fromEmail }, { count: total }] = await Promise.all([
+      supabase.from('contact_submissions').select('id', { count: 'exact', head: true }).eq('email', email).gte('created_at', since),
+      supabase.from('contact_submissions').select('id', { count: 'exact', head: true }).gte('created_at', since),
+    ]);
+    if ((fromEmail ?? 0) >= MAX_PER_EMAIL || (total ?? 0) >= MAX_TOTAL) {
+      return { success: false, error: 'Too many messages right now. Please try again in a few minutes.' };
+    }
+
     const { data: inserted, error: insertError } = await supabase
       .from('contact_submissions')
       .insert({ name, email, phone, message })
