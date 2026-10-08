@@ -1,5 +1,9 @@
 'use client';
 
+/* eslint-disable react-hooks/immutability, react-hooks/set-state-in-effect --
+   this component drives an imperative WebGL engine (GlobeNav) and pointer-gesture closures; the
+   React Compiler purity rules do not model that, and the mutations are intentional. */
+
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';

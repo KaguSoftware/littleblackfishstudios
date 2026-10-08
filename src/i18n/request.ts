@@ -1,12 +1,17 @@
 import { getRequestConfig } from 'next-intl/server';
 
+const LOCALES = ['en', 'fa'] as const;
+type Locale = (typeof LOCALES)[number];
+
+const isLocale = (value: string | undefined): value is Locale =>
+  LOCALES.includes(value as Locale);
+
 export default getRequestConfig(async ({ locale }) => {
-  // Validate that the incoming `locale` parameter is valid
-  const validLocales = ['en', 'fa'];
-  const activeLocale = validLocales.includes(locale as any) ? locale : 'en';
+  // Fall back to English for an unknown locale
+  const activeLocale: Locale = isLocale(locale) ? locale : 'en';
 
   return {
-    locale: activeLocale as string,
+    locale: activeLocale,
     messages: (await import(`../messages/${activeLocale}.json`)).default
   };
 });

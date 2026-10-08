@@ -59,13 +59,11 @@ const HeroClient: React.FC<HeroProps> = ({ slides, locale }) => {
 		}, 10000);
 	}, []);
 
-	// Activate the YouTube iframe when a slide becomes current
-	useEffect(() => {
-		const slide = slides[current];
-		if (slide?.youtubeUrl) {
-			setActivatedSlides((prev) => new Set(prev).add(slide.id));
-		}
-	}, [current, slides]);
+	// Activate the YouTube iframe when a slide becomes current (state adjusted during render, not in an effect)
+	const currentYoutubeSlide = slides[current]?.youtubeUrl ? slides[current] : null;
+	if (currentYoutubeSlide && !activatedSlides.has(currentYoutubeSlide.id)) {
+		setActivatedSlides((prev) => new Set(prev).add(currentYoutubeSlide.id));
+	}
 
 	const isVideo = (url: string) => /\.(mp4|webm|ogg|mov)$/i.test(url);
 

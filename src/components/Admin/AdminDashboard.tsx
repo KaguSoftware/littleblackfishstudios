@@ -58,6 +58,17 @@ interface AdminDashboardProps {
   locale: string;
 }
 
+/** Local copy of a server prop: editable in place, reset whenever the server pushes fresh data (after revalidate). */
+function useSyncedState<T>(source: T) {
+  const [state, setState] = useState(source);
+  const [prevSource, setPrevSource] = useState(source);
+  if (prevSource !== source) {
+    setPrevSource(source);
+    setState(source);
+  }
+  return [state, setState] as const;
+}
+
 export default function AdminDashboard({
   initialProjects,
   initialHeroSlides,
@@ -72,16 +83,12 @@ export default function AdminDashboard({
     SerializedProject | SerializedHeroSlide | SerializedCategory | null
   >(null);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [submissions, setSubmissions] = useState(initialSubmissions);
-  const [projects, setProjects] = useState(initialProjects);
-  const [heroSlides, setHeroSlides] = useState(initialHeroSlides);
-  const [categories, setCategories] = useState(initialCategories);
+  const [submissions, setSubmissions] = useSyncedState(initialSubmissions);
+  const [projects, setProjects] = useSyncedState(initialProjects);
+  const [heroSlides, setHeroSlides] = useSyncedState(initialHeroSlides);
+  const [categories, setCategories] = useSyncedState(initialCategories);
 
-  // Keep local state in sync when the server pushes fresh props (after revalidate).
-  React.useEffect(() => setProjects(initialProjects), [initialProjects]);
-  React.useEffect(() => setHeroSlides(initialHeroSlides), [initialHeroSlides]);
-  React.useEffect(() => setCategories(initialCategories), [initialCategories]);
-  React.useEffect(() => setSubmissions(initialSubmissions), [initialSubmissions]);
+
 
   const handleReorder = async (
     newItems: SortableItem[],

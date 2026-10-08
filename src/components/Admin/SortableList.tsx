@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { getYouTubeThumbnail } from '@/lib/youtube';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { GripVertical, Pencil, Trash2, Eye, EyeOff, ArrowUp, ArrowDown, Save, X, Check, AlertCircle } from 'lucide-react';
@@ -38,12 +38,13 @@ export default function SortableList({ items, onReorder, onEdit, onDelete, onTog
     [items],
   );
 
-  useEffect(() => {
-    if (!isDirty) {
-      setLocalItems(items);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [itemsSignature, isDirty]);
+  // Pick up fresh server items unless the user has unsaved reordering (adjusted during render, not in an effect)
+  const syncKey = `${itemsSignature}|${isDirty}`;
+  const [prevSyncKey, setPrevSyncKey] = useState(syncKey);
+  if (prevSyncKey !== syncKey) {
+    setPrevSyncKey(syncKey);
+    if (!isDirty) setLocalItems(items);
+  }
 
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
@@ -81,9 +82,9 @@ export default function SortableList({ items, onReorder, onEdit, onDelete, onTog
         setIsDirty(false);
         setTimeout(() => setSaveStatus('idle'), 2500);
       }
-    } catch (e: any) {
+    } catch (e) {
       setSaveStatus('error');
-      setErrorMsg(e?.message || 'Save failed');
+      setErrorMsg(e instanceof Error ? e.message : 'Save failed');
     } finally {
       setIsSaving(false);
     }
